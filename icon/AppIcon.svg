@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tealBand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0E9A97"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+    <radialGradient id="pinDot" cx="38%" cy="34%" r="70%">
+      <stop offset="0%" stop-color="#FFD08A"/>
+      <stop offset="45%" stop-color="#FFB454"/>
+      <stop offset="100%" stop-color="#F59421"/>
+    </radialGradient>
+    <filter id="glowSoft" x="-250%" y="-250%" width="600%" height="600%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+    <filter id="glowTight" x="-250%" y="-250%" width="600%" height="600%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed ivory background -->
+  <rect x="0" y="0" width="1024" height="1024" fill="#F7F4EC"/>
+
+  <!-- Station sign teal bands -->
+  <rect x="0" y="0" width="1024" height="152" fill="url(#tealBand)"/>
+  <rect x="0" y="872" width="1024" height="152" fill="url(#tealBand)"/>
+
+  <!-- Glow, laid down first so the hook's opaque stroke cuts a clean edge into it -->
+  <circle cx="500" cy="730" r="118" fill="#FF9F1C" opacity="0.32" filter="url(#glowSoft)"/>
+  <circle cx="500" cy="730" r="88" fill="#FFA733" opacity="0.55" filter="url(#glowTight)"/>
+
+  <!-- Question mark hook -->
+  <path d="M 386,372
+           C 386,276 442,222 512,222
+           C 592,222 646,270 646,344
+           C 646,414 600,438 556,470
+           C 516,500 500,524 500,588"
+        fill="none"
+        stroke="#1C2A40"
+        stroke-width="92"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Current-location pin dot (the question mark's point) -->
+  <circle cx="500" cy="730" r="66" fill="url(#pinDot)"/>
+</svg>
