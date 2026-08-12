@@ -1,0 +1,5 @@
+[
+  { "source": "NHKニュース", "url": "http://www3.nhk.or.jp/rss/news/cat0.xml" },
+  { "source": "ITmedia", "url": "https://rss.itmedia.co.jp/rss/2.0/itmedia_all.xml" },
+  { "source": "AFPBB News", "url": "http://feeds.afpbb.com/rss/afpbb/afpbbnews" }
+]

@@ -1,0 +1,24 @@
+{
+  "name": "hello-first-pr",
+  "version": "1.0.0",
+  "description": "多面ニュース解説サイトのニュース収集・要約パイプライン",
+  "main": "collect.js",
+  "type": "module",
+  "scripts": {
+    "collect": "node collect.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kakeru110/hello-first-pr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kakeru110/hello-first-pr/issues"
+  },
+  "homepage": "https://github.com/kakeru110/hello-first-pr#readme",
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  }
+}
