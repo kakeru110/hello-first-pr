@@ -38,3 +38,14 @@ python app.py
 5. 「点数を計算する」を押すと、翻・符・点数・成立した役が表示される
 
 写真からの牌認識はAIによる推定のため、誤読することがあります。計算前に手牌の内容を必ず確認してください。
+
+### デプロイ（Render.comの例・無料枠あり）
+
+1. [Render](https://render.com/) にGitHubアカウントでサインアップする
+2. ダッシュボードで「New +」→「Web Service」を選び、このリポジトリを接続する
+3. ブランチに `claude/mahjong-score-automation-29dbsl`（またはマージ後は `main`）を選ぶ
+4. `render.yaml` を自動検出するので、設定はそのままでOK（Build: `pip install -r requirements.txt` / Start: `gunicorn app:app --bind 0.0.0.0:$PORT`）
+5. 環境変数 `ANTHROPIC_API_KEY` に自分のAPIキーを設定する
+6. 「Create Web Service」でデプロイすると、`https://<サービス名>.onrender.com` のようなURLが発行される
+
+無料プランはしばらくアクセスがないとスリープし、次のアクセス時に起動まで数十秒かかります。
