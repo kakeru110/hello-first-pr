@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>麻雀点数自動計算</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <h1>麻雀点数自動計算</h1>
+  <p class="subtitle">手牌の写真を読み取って、点数を自動計算します</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1. ルール設定</h2>
+    <p class="hint">対局前に決めておくルールです。ブラウザに保存され、次回も引き継がれます。</p>
+    <div class="rule-grid">
+      <label>
+        クイタン（喰い断）
+        <select id="rule-kuitan">
+          <option value="true">あり</option>
+          <option value="false">なし</option>
+        </select>
+      </label>
+      <label>
+        赤ドラ
+        <select id="rule-aka-dora">
+          <option value="true">あり</option>
+          <option value="false">なし</option>
+        </select>
+      </label>
+      <label>
+        数え役満
+        <select id="rule-kazoe-limit">
+          <option value="0">四倍満まで（標準）</option>
+          <option value="1">三倍満まで</option>
+          <option value="2">青天井（翻数通り加算）</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. 写真から読み取り</h2>
+    <p class="hint">手牌14枚（自摸/ロンした牌を含む）が写っている写真をアップロードしてください。</p>
+    <input type="file" id="image-input" accept="image/*" />
+    <img id="image-preview" class="preview" hidden />
+    <button id="recognize-btn" type="button">この写真から牌を読み取る</button>
+    <p id="recognize-status" class="status"></p>
+  </section>
+
+  <section class="card">
+    <h2>3. 手牌を確認・修正</h2>
+    <p class="hint">
+      表記は 数字+英字（m=萬子, p=筒子, s=索子, z=字牌, 赤5は0）。
+      例: <code>1m 2m 3m 5p 5p 5p 7s 8s 9s 1z 1z 1z 0s 6s</code><br />
+      字牌: 1z=東 2z=南 3z=西 4z=北 5z=白 6z=發 7z=中
+    </p>
+    <label class="block-label">
+      面前の手牌（上がり牌・鳴いた面子を除く、スペース区切り）
+      <textarea id="concealed-tiles" rows="2" placeholder="例: 2m3m4m 6p7p8p 1s1s1s 5z5z"></textarea>
+    </label>
+    <label class="block-label narrow">
+      上がり牌（1枚）
+      <input type="text" id="win-tile" placeholder="例: 9s" />
+    </label>
+
+    <div id="melds-container"></div>
+    <button id="add-meld-btn" type="button" class="secondary">鳴いた面子を追加</button>
+  </section>
+
+  <section class="card">
+    <h2>4. 和了状況</h2>
+    <div class="rule-grid">
+      <label>
+        和了方法
+        <select id="win-method">
+          <option value="tsumo">ツモ</option>
+          <option value="ron">ロン</option>
+        </select>
+      </label>
+      <label>
+        場風
+        <select id="round-wind">
+          <option value="east">東</option>
+          <option value="south">南</option>
+          <option value="west">西</option>
+          <option value="north">北</option>
+        </select>
+      </label>
+      <label>
+        自風
+        <select id="seat-wind">
+          <option value="east">東</option>
+          <option value="south">南</option>
+          <option value="west">西</option>
+          <option value="north">北</option>
+        </select>
+      </label>
+      <label>
+        本場
+        <input type="number" id="honba" value="0" min="0" />
+      </label>
+      <label>
+        供託（リーチ棒）本数
+        <input type="number" id="kyotaku" value="0" min="0" />
+      </label>
+    </div>
+
+    <div class="checkbox-grid">
+      <label><input type="checkbox" id="is-riichi" /> リーチ</label>
+      <label><input type="checkbox" id="is-daburu-riichi" /> ダブルリーチ</label>
+      <label><input type="checkbox" id="is-ippatsu" /> 一発</label>
+      <label><input type="checkbox" id="is-rinshan" /> 嶺上開花</label>
+      <label><input type="checkbox" id="is-chankan" /> 槍槓</label>
+      <label><input type="checkbox" id="is-haitei" /> 海底摸月</label>
+      <label><input type="checkbox" id="is-houtei" /> 河底撈魚</label>
+    </div>
+
+    <label class="block-label narrow">
+      ドラ表示牌（スペース区切り）
+      <input type="text" id="dora-indicators" placeholder="例: 3p" />
+    </label>
+    <label class="block-label narrow">
+      裏ドラ表示牌（リーチ時のみ、スペース区切り）
+      <input type="text" id="ura-dora-indicators" placeholder="例: 8s" />
+    </label>
+  </section>
+
+  <button id="calculate-btn" type="button" class="primary">点数を計算する</button>
+
+  <section id="result" class="card result" hidden></section>
+</main>
+
+<template id="meld-template">
+  <div class="meld-row">
+    <input type="text" class="meld-tiles" placeholder="例: 2p3p4p（3〜4枚）" />
+    <label class="meld-opened"><input type="checkbox" class="meld-opened-checkbox" checked /> 鳴き（オフで暗槓）</label>
+    <button type="button" class="remove-meld secondary">削除</button>
+  </div>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
