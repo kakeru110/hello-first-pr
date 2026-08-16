@@ -28,8 +28,42 @@
   const importText = document.getElementById("import-text");
   const importBtn = document.getElementById("import-btn");
   const importResult = document.getElementById("import-result");
+  const githubTokenInput = document.getElementById("github-token");
+  const githubSaveBtn = document.getElementById("github-save-btn");
+  const githubDisconnectBtn = document.getElementById("github-disconnect-btn");
+  const syncStatus = document.getElementById("sync-status");
+
+  const GITHUB_TOKEN_KEY = "muscleLog.githubToken";
+  const GITHUB_OWNER = "kakeru110";
+  const GITHUB_REPO = "hello-first-pr";
+  const GITHUB_BRANCH = "main";
+  const GITHUB_PATH = "data/records.json";
+  let githubSha = null;
 
   dateInput.value = todayISO();
+
+  githubTokenInput.value = localStorage.getItem(GITHUB_TOKEN_KEY) || "";
+  if (githubTokenInput.value) {
+    syncFromGithub();
+  }
+
+  githubSaveBtn.addEventListener("click", function () {
+    const token = githubTokenInput.value.trim();
+    if (!token) {
+      setSyncStatus("トークンを入力してください", true);
+      return;
+    }
+    localStorage.setItem(GITHUB_TOKEN_KEY, token);
+    githubSha = null;
+    syncFromGithub();
+  });
+
+  githubDisconnectBtn.addEventListener("click", function () {
+    localStorage.removeItem(GITHUB_TOKEN_KEY);
+    githubTokenInput.value = "";
+    githubSha = null;
+    setSyncStatus("GitHub同期: 無効（この端末内にのみ保存されます）");
+  });
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -47,6 +81,7 @@
     }
     records.push(record);
     saveRecords();
+    pushToGithub({ type: "add", record });
 
     const keepExercise = exerciseInput.value;
     form.reset();
@@ -63,6 +98,7 @@
     const id = target.dataset.id;
     records = records.filter((r) => r.id !== id);
     saveRecords();
+    pushToGithub({ type: "delete", id });
     renderAll();
   });
 
@@ -74,6 +110,7 @@
     if (parsed.length) {
       records = records.concat(parsed);
       saveRecords();
+      pushToGithub({ type: "add-many", records: parsed });
       renderAll();
     }
     renderImportResult(parsed.length, warnings);
@@ -184,6 +221,138 @@
 
   function saveRecords() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  }
+
+  function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+
+  function base64ToUtf8(b64) {
+    return decodeURIComponent(escape(atob(b64.replace(/\n/g, ""))));
+  }
+
+  function nowTime() {
+    return new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function setSyncStatus(text, isError, isOk) {
+    syncStatus.textContent = text;
+    syncStatus.classList.toggle("sync-error", !!isError);
+    syncStatus.classList.toggle("sync-ok", !!isOk && !isError);
+  }
+
+  function githubHeaders(token) {
+    return {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    };
+  }
+
+  async function githubGetFile(token) {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`;
+    const res = await fetch(url, { headers: githubHeaders(token) });
+    if (res.status === 404) {
+      return { exists: false, sha: null, records: null };
+    }
+    if (!res.ok) {
+      throw new Error(`取得エラー (${res.status})`);
+    }
+    const data = await res.json();
+    return { exists: true, sha: data.sha, records: JSON.parse(base64ToUtf8(data.content)) };
+  }
+
+  async function githubPutFile(token, recs, sha, message) {
+    const body = {
+      message: message || "Update muscle training records",
+      content: utf8ToBase64(JSON.stringify(recs, null, 2)),
+      branch: GITHUB_BRANCH,
+    };
+    if (sha) body.sha = sha;
+    const res = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`,
+      {
+        method: "PUT",
+        headers: Object.assign({ "Content-Type": "application/json" }, githubHeaders(token)),
+        body: JSON.stringify(body),
+      }
+    );
+    if (res.status === 409) {
+      const err = new Error("conflict");
+      err.conflict = true;
+      throw err;
+    }
+    if (!res.ok) {
+      throw new Error(`保存エラー (${res.status})`);
+    }
+    const data = await res.json();
+    return data.content.sha;
+  }
+
+  async function syncFromGithub() {
+    const token = localStorage.getItem(GITHUB_TOKEN_KEY);
+    if (!token) return;
+    setSyncStatus("GitHub同期: 確認中...");
+    try {
+      const result = await githubGetFile(token);
+      if (!result.exists) {
+        const sha = await githubPutFile(token, records, null, "Initial records sync");
+        githubSha = sha;
+        setSyncStatus(`GitHub同期: 有効（この端末の記録で初期化しました・${nowTime()}）`, false, true);
+      } else {
+        records = result.records;
+        githubSha = result.sha;
+        saveRecords();
+        renderAll();
+        setSyncStatus(`GitHub同期: 有効（最終同期 ${nowTime()}）`, false, true);
+      }
+    } catch (err) {
+      setSyncStatus(`GitHub同期エラー: ${err.message}`, true);
+    }
+  }
+
+  // 競合(409)時、直前の自分の変更(pendingChange)を最新のリモートに再適用してから
+  // もう一度だけ保存を試みる。何もしないと自分がいま行った追加/削除が消えてしまうため。
+  function applyPendingChange(baseRecords, pendingChange) {
+    if (!pendingChange) return baseRecords.slice();
+    if (pendingChange.type === "add") {
+      if (baseRecords.some((r) => r.id === pendingChange.record.id)) return baseRecords.slice();
+      return baseRecords.concat([pendingChange.record]);
+    }
+    if (pendingChange.type === "add-many") {
+      const existingIds = new Set(baseRecords.map((r) => r.id));
+      return baseRecords.concat(pendingChange.records.filter((r) => !existingIds.has(r.id)));
+    }
+    if (pendingChange.type === "delete") {
+      return baseRecords.filter((r) => r.id !== pendingChange.id);
+    }
+    return baseRecords.slice();
+  }
+
+  async function pushToGithub(pendingChange) {
+    const token = localStorage.getItem(GITHUB_TOKEN_KEY);
+    if (!token) return;
+    try {
+      const sha = await githubPutFile(token, records, githubSha, "Update muscle training records");
+      githubSha = sha;
+      setSyncStatus(`GitHub同期: 有効（最終同期 ${nowTime()}）`, false, true);
+    } catch (err) {
+      if (err.conflict) {
+        try {
+          const result = await githubGetFile(token);
+          records = applyPendingChange(result.records, pendingChange);
+          saveRecords();
+          renderAll();
+          const sha2 = await githubPutFile(token, records, result.sha, "Update muscle training records (merged)");
+          githubSha = sha2;
+          setSyncStatus(`GitHub同期: 有効（他の端末の更新と統合しました・${nowTime()}）`, false, true);
+        } catch (err2) {
+          setSyncStatus(`GitHub同期エラー: ${err2.message}`, true);
+        }
+      } else {
+        setSyncStatus(`GitHub同期エラー: ${err.message}`, true);
+      }
+    }
   }
 
   function todayISO() {

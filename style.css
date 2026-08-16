@@ -216,6 +216,50 @@ input:focus, select:focus {
   margin-bottom: 2px;
 }
 
+#sync-details summary {
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+#sync-details .import-help {
+  margin-top: 12px;
+}
+
+#sync-details .import-help a {
+  color: var(--series-1);
+}
+
+#sync-details #github-token {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.sync-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sync-actions .btn-primary {
+  margin-top: 0;
+  flex: 1;
+}
+
+.sync-status {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.sync-status.sync-error {
+  color: var(--status-critical);
+}
+
+.sync-status.sync-ok {
+  color: var(--status-good);
+}
+
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
