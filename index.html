@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筋トレ記録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>筋トレ記録</h1>
+  <p class="subtitle">種目・重量・回数を記録して、成長をグラフで確認できます</p>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="form-heading">
+    <h2 id="form-heading">記録を追加</h2>
+    <form id="record-form">
+      <div class="field-row">
+        <label for="date">日付</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field-row">
+        <label for="exercise">種目</label>
+        <input type="text" id="exercise" list="exercise-options" placeholder="例: ベンチプレス" required>
+        <datalist id="exercise-options"></datalist>
+      </div>
+      <div class="field-row triple">
+        <div>
+          <label for="weight">重量 (kg)</label>
+          <input type="number" id="weight" min="0" step="0.5" required>
+        </div>
+        <div>
+          <label for="reps">回数</label>
+          <input type="number" id="reps" min="1" step="1" required>
+        </div>
+        <div>
+          <label for="sets">セット数</label>
+          <input type="number" id="sets" min="1" step="1" value="1" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <label for="memo">メモ (任意)</label>
+        <input type="text" id="memo" placeholder="フォームの気づきなど">
+      </div>
+      <button type="submit" class="btn-primary">追加する</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="stats-heading">
+    <h2 id="stats-heading">概要</h2>
+    <div class="stat-tiles" id="stat-tiles"></div>
+  </section>
+
+  <section class="card" aria-labelledby="chart-heading">
+    <h2 id="chart-heading">進捗グラフ</h2>
+    <div class="chart-controls">
+      <label for="chart-exercise">種目を選択</label>
+      <select id="chart-exercise"></select>
+    </div>
+    <div id="chart-container">
+      <p id="chart-empty" class="empty-message">記録がまだありません</p>
+      <svg id="progress-chart" viewBox="0 0 640 260" role="img" aria-labelledby="chart-heading" style="display:none"></svg>
+      <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="history-heading">
+    <div class="history-header">
+      <h2 id="history-heading">記録一覧</h2>
+      <select id="filter-exercise">
+        <option value="">すべての種目</option>
+      </select>
+    </div>
+    <div id="history-list"></div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
