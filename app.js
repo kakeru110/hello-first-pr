@@ -32,7 +32,6 @@
   const addRecordBtn = document.getElementById("add-record-btn");
   const weightInput = document.getElementById("weight");
   const repsInput = document.getElementById("reps");
-  const setsInput = document.getElementById("sets");
   const memoInput = document.getElementById("memo");
   const filterExercise = document.getElementById("filter-exercise");
   const chartExercise = document.getElementById("chart-exercise");
@@ -87,10 +86,10 @@
       exercise: exerciseInput.value,
       weight: parseFloat(weightInput.value),
       reps: parseInt(repsInput.value, 10),
-      sets: parseInt(setsInput.value, 10),
+      sets: 1,
       memo: memoInput.value.trim(),
     };
-    if (!record.date || !record.exercise || isNaN(record.weight) || isNaN(record.reps) || isNaN(record.sets)) {
+    if (!record.date || !record.exercise || isNaN(record.weight) || isNaN(record.reps)) {
       return;
     }
     records.push(record);
@@ -100,7 +99,6 @@
     const keepExercise = record.exercise;
     form.reset();
     dateInput.value = record.date;
-    setsInput.value = "1";
 
     renderAll({ selectExerciseForChart: record.exercise, keepFormExercise: keepExercise });
   });
