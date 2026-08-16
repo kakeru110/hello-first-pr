@@ -530,7 +530,9 @@
                 (r) => `
               <span class="set-chip">
                 <span class="set-chip-text">${setLabel(r)}</span>
-                <button class="set-chip-delete" data-id="${r.id}" aria-label="この記録を削除">×</button>
+                <button class="set-chip-delete" data-id="${r.id}" aria-label="この記録を削除">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+                </button>
               </span>
             `
               )
