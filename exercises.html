@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>種目の管理 - 筋トレ記録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <p class="breadcrumb"><a href="index.html">← 記録に戻る</a></p>
+  <h1>種目の管理</h1>
+  <p class="subtitle">ここで追加した種目が、記録画面の選択肢に表示されます</p>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="add-exercise-heading">
+    <h2 id="add-exercise-heading">種目を追加</h2>
+    <form id="exercise-form">
+      <div class="field-row">
+        <label for="new-exercise-name">種目名</label>
+        <input type="text" id="new-exercise-name" placeholder="例: スミスショルダープレス" required>
+      </div>
+      <button type="submit" class="btn-primary">追加する</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="exercise-list-heading">
+    <h2 id="exercise-list-heading">登録済みの種目（<span id="exercise-count">0</span>）</h2>
+    <div id="exercise-list"></div>
+    <p id="exercise-empty" class="empty-message" hidden>まだ種目がありません</p>
+    <p class="sync-status" id="sync-status"></p>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>GitHub同期の設定は<a href="index.html">記録画面</a>で行えます</p>
+</footer>
+
+<script src="sync.js"></script>
+<script src="exercises.js"></script>
+</body>
+</html>
