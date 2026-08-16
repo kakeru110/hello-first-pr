@@ -513,7 +513,7 @@
     const dates = Array.from(byDate.keys()).sort((a, b) => b.localeCompare(a));
 
     historyList.innerHTML = dates
-      .map((date) => {
+      .map((date, dateIndex) => {
         const dayRecords = byDate.get(date);
         const dayVolume = dayRecords.reduce((sum, r) => sum + r.weight * r.reps * r.sets, 0);
 
@@ -552,13 +552,13 @@
           .join("");
 
         return `
-          <div class="day-card">
-            <div class="day-card-header">
+          <details class="day-card"${dateIndex === 0 ? " open" : ""}>
+            <summary class="day-card-header">
               <h3>${formatDate(date)}</h3>
               ${dayVolume > 0 ? `<span class="volume-badge volume-badge-day">合計Vol ${Math.round(dayVolume)}</span>` : ""}
-            </div>
+            </summary>
             ${exerciseGroups}
-          </div>
+          </details>
         `;
       })
       .join("");

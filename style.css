@@ -76,22 +76,22 @@ body {
 main {
   max-width: 640px;
   margin: 0 auto;
-  padding: 8px 20px 40px;
+  padding: 8px 16px 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px 16px;
 }
 
 .card h2 {
-  margin: 0 0 16px;
-  font-size: 1.05rem;
+  margin: 0 0 10px;
+  font-size: 1rem;
 }
 
 #record-form {
@@ -162,7 +162,7 @@ label {
 
 input, select {
   font: inherit;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--baseline);
   background: var(--surface-1);
@@ -176,7 +176,7 @@ input:focus, select:focus {
 
 .btn-primary {
   margin-top: 4px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: none;
   background: var(--series-1);
@@ -316,13 +316,13 @@ select:disabled {
 
 .stat-tile {
   text-align: center;
-  padding: 12px 8px;
+  padding: 8px 8px;
   border-radius: 8px;
   background: var(--page-plane);
 }
 
 .stat-tile .value {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -428,8 +428,8 @@ select:disabled {
 .day-card {
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
   background: var(--page-plane);
 }
 
@@ -437,24 +437,48 @@ select:disabled {
   margin-bottom: 0;
 }
 
+.day-card[open] {
+  padding-bottom: 10px;
+}
+
 .day-card-header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 8px;
-  margin-bottom: 10px;
+  padding: 4px 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.day-card-header::-webkit-details-marker {
+  display: none;
+}
+
+.day-card-header::before {
+  content: "▸";
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.day-card[open] > .day-card-header::before {
+  content: "▾";
+}
+
+.day-card[open] > .day-card-header {
+  margin-bottom: 6px;
 }
 
 .day-card-header h3 {
   font-size: 0.85rem;
   color: var(--text-primary);
   font-weight: 700;
-  margin: 0;
+  margin: 0 auto 0 0;
   font-variant-numeric: tabular-nums;
 }
 
 .exercise-group {
-  padding: 8px 0;
+  padding: 6px 0;
   border-top: 1px solid var(--gridline);
 }
 
