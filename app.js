@@ -404,11 +404,10 @@
     return local.toISOString().slice(0, 10);
   }
 
-  // 記録画面の追加フォーム用: 登録済み種目 と これまで記録した種目 の両方を含む
-  function getAllExerciseNames() {
-    const set = new Set(exercises);
-    records.forEach((r) => set.add(r.exercise));
-    return Array.from(set).sort((a, b) => a.localeCompare(b, "ja"));
+  // 記録画面の追加フォーム用: 種目管理ページで登録されている種目のみ
+  // (ここから削除すると、過去の記録は残ったまま今後の入力では選べなくなる)
+  function getRegisteredExerciseNames() {
+    return exercises.slice().sort((a, b) => a.localeCompare(b, "ja"));
   }
 
   // 概要・絞り込み・グラフ用: 実際に記録がある種目のみ
@@ -427,7 +426,7 @@
 
   function renderExerciseOptions(opts) {
     opts = opts || {};
-    const allNames = getAllExerciseNames();
+    const allNames = getRegisteredExerciseNames();
     const prevFormValue = opts.keepFormExercise !== undefined ? opts.keepFormExercise : exerciseInput.value;
 
     noExerciseHint.hidden = allNames.length > 0;

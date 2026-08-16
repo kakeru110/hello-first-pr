@@ -557,17 +557,31 @@ select:disabled {
   color: var(--text-muted);
 }
 
-.delete-btn {
+.record-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.delete-btn,
+.edit-btn {
   border: none;
   background: transparent;
-  color: var(--status-critical);
   font-size: 0.8rem;
   cursor: pointer;
   padding: 6px 8px;
   border-radius: 6px;
 }
 
-.delete-btn:hover {
+.delete-btn {
+  color: var(--status-critical);
+}
+
+.edit-btn {
+  color: var(--series-1);
+}
+
+.delete-btn:hover,
+.edit-btn:hover {
   background: var(--page-plane);
 }
 
