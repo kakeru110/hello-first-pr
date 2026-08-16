@@ -3,10 +3,14 @@
 
   const EXERCISES_KEY = "muscleLog.exercises";
   const EXERCISES_PATH = "data/exercises.json";
+  const RECORDS_KEY = "muscleLog.records";
+  const RECORDS_PATH = "data/records.json";
   const SEED_EXERCISES = ["アームカール", "ジャンプ", "スミスアームカール", "スミスサポーテッドロー", "スミスベンチ", "スミスベントオーバーロー", "バイク"];
 
   let exercises = loadExercises();
+  let records = loadRecords();
   let exercisesSha = null;
+  let recordsSha = null;
 
   const form = document.getElementById("exercise-form");
   const nameInput = document.getElementById("new-exercise-name");
@@ -33,20 +37,31 @@
     }
     exercises.push(name);
     exercises.sort((a, b) => a.localeCompare(b, "ja"));
-    save();
-    pushToGithub({ type: "add", name });
+    saveExercises();
+    pushExercisesToGithub({ type: "add", name });
     form.reset();
     render();
   });
 
   listEl.addEventListener("click", function (e) {
-    const target = e.target.closest(".delete-btn");
-    if (!target) return;
-    const name = target.dataset.name;
-    exercises = exercises.filter((n) => n !== name);
-    save();
-    pushToGithub({ type: "delete", name });
-    render();
+    const deleteBtn = e.target.closest(".delete-btn");
+    if (deleteBtn) {
+      const name = deleteBtn.dataset.name;
+      exercises = exercises.filter((n) => n !== name);
+      saveExercises();
+      pushExercisesToGithub({ type: "delete", name });
+      render();
+      return;
+    }
+    const editBtn = e.target.closest(".edit-btn");
+    if (editBtn) {
+      const oldName = editBtn.dataset.name;
+      const newName = window.prompt("新しい種目名（この種目を使った過去の記録もすべて書き換わります）", oldName);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed || trimmed === oldName) return;
+      renameExercise(oldName, trimmed);
+    }
   });
 
   function loadExercises() {
@@ -60,8 +75,21 @@
     }
   }
 
-  function save() {
+  function saveExercises() {
     localStorage.setItem(EXERCISES_KEY, JSON.stringify(exercises));
+  }
+
+  function loadRecords() {
+    try {
+      const raw = localStorage.getItem(RECORDS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function saveRecords() {
+    localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
   }
 
   function render() {
@@ -74,7 +102,10 @@
         <div class="record-main">
           <span class="record-exercise">${escapeHtml(name)}</span>
         </div>
-        <button class="delete-btn" data-name="${escapeHtml(name)}" aria-label="削除">削除</button>
+        <div class="record-actions">
+          <button class="edit-btn" data-name="${escapeHtml(name)}" aria-label="名前を変更">編集</button>
+          <button class="delete-btn" data-name="${escapeHtml(name)}" aria-label="削除">削除</button>
+        </div>
       </div>
     `
       )
@@ -85,6 +116,47 @@
     syncStatus.textContent = text;
     syncStatus.classList.toggle("sync-error", !!isError);
     syncStatus.classList.toggle("sync-ok", !!isOk && !isError);
+  }
+
+  // 種目名の変更(=統合)。登録リストの書き換えに加え、その種目名を使った
+  // 過去の記録もすべて新しい名前に書き換えて、履歴・グラフ上で1つにまとめる。
+  async function renameExercise(oldName, newName) {
+    exercises = exercises.filter((n) => n !== oldName);
+    if (!exercises.includes(newName)) exercises.push(newName);
+    exercises.sort((a, b) => a.localeCompare(b, "ja"));
+    saveExercises();
+    render();
+
+    records = records.map((r) => (r.exercise === oldName ? Object.assign({}, r, { exercise: newName }) : r));
+    saveRecords();
+
+    const token = MuscleSync.getToken();
+    if (!token) {
+      setSyncStatus(`「${oldName}」を「${newName}」に変更しました（この端末のみ）`, false, true);
+      return;
+    }
+
+    setSyncStatus("種目名を変更中...");
+    try {
+      // 記録側は他端末の最新を取得してから書き換える(取りこぼし防止)
+      const latestRecords = await MuscleSync.getFile(token, RECORDS_PATH);
+      const baseRecords = latestRecords.exists ? latestRecords.data : records;
+      records = baseRecords.map((r) => (r.exercise === oldName ? Object.assign({}, r, { exercise: newName }) : r));
+      saveRecords();
+      const recSha = await MuscleSync.putFile(
+        token,
+        RECORDS_PATH,
+        records,
+        latestRecords.exists ? latestRecords.sha : null,
+        `Rename exercise ${oldName} -> ${newName}`
+      );
+      recordsSha = recSha;
+
+      await pushExercisesToGithub({ type: "rename", from: oldName, to: newName });
+      setSyncStatus(`「${oldName}」を「${newName}」に変更しました・${MuscleSync.nowTime()}`, false, true);
+    } catch (err) {
+      setSyncStatus(`GitHub同期エラー: ${err.message}`, true);
+    }
   }
 
   async function syncFromGithub() {
@@ -100,7 +172,7 @@
       } else {
         exercises = result.data;
         exercisesSha = result.sha;
-        save();
+        saveExercises();
         render();
         setSyncStatus(`GitHub同期: 有効（最終同期 ${MuscleSync.nowTime()}）`, false, true);
       }
@@ -117,10 +189,14 @@
     if (pendingChange.type === "delete") {
       return baseNames.filter((n) => n !== pendingChange.name);
     }
+    if (pendingChange.type === "rename") {
+      const withoutOld = baseNames.filter((n) => n !== pendingChange.from);
+      return withoutOld.includes(pendingChange.to) ? withoutOld : withoutOld.concat([pendingChange.to]);
+    }
     return baseNames.slice();
   }
 
-  async function pushToGithub(pendingChange) {
+  async function pushExercisesToGithub(pendingChange) {
     const token = MuscleSync.getToken();
     if (!token) return;
     try {
@@ -133,7 +209,7 @@
           const result = await MuscleSync.getFile(token, EXERCISES_PATH);
           exercises = applyPendingChange(result.data, pendingChange);
           exercises.sort((a, b) => a.localeCompare(b, "ja"));
-          save();
+          saveExercises();
           render();
           const sha2 = await MuscleSync.putFile(token, EXERCISES_PATH, exercises, result.sha, "Update exercise list (merged)");
           exercisesSha = sha2;
