@@ -106,12 +106,12 @@ main {
   gap: 4px;
 }
 
-.field-row.triple {
+.field-row.pair {
   flex-direction: row;
   gap: 12px;
 }
 
-.field-row.triple > div {
+.field-row.pair > div {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -611,7 +611,7 @@ select:disabled {
 }
 
 @media (max-width: 400px) {
-  .field-row.triple {
+  .field-row.pair {
     flex-direction: column;
   }
 
