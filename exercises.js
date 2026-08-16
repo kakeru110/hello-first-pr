@@ -1,6 +1,11 @@
 (function () {
   "use strict";
 
+  const EDIT_ICON =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2.5 13.5 5 5 13.5H2.5V11L11 2.5Z"/></svg>';
+  const DELETE_ICON =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6.5 4.5V3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1.5M4.5 4.5 5 13a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1l.5-8.5M6.5 7v4M9.5 7v4"/></svg>';
+
   const EXERCISES_KEY = "muscleLog.exercises";
   const EXERCISES_PATH = "data/exercises.json";
   const RECORDS_KEY = "muscleLog.records";
@@ -103,8 +108,8 @@
           <span class="record-exercise">${escapeHtml(name)}</span>
         </div>
         <div class="record-actions">
-          <button class="edit-btn" data-name="${escapeHtml(name)}" aria-label="名前を変更">編集</button>
-          <button class="delete-btn" data-name="${escapeHtml(name)}" aria-label="削除">削除</button>
+          <button class="edit-btn" data-name="${escapeHtml(name)}" aria-label="名前を変更">${EDIT_ICON}</button>
+          <button class="delete-btn" data-name="${escapeHtml(name)}" aria-label="削除">${DELETE_ICON}</button>
         </div>
       </div>
     `
