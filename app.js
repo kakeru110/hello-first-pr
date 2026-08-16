@@ -107,6 +107,12 @@
     const target = e.target.closest(".set-chip-delete");
     if (!target) return;
     const id = target.dataset.id;
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+    const confirmed = window.confirm(
+      `この記録を削除しますか？\n\n${formatDate(record.date)}　${record.exercise}\n${setLabel(record)}`
+    );
+    if (!confirmed) return;
     records = records.filter((r) => r.id !== id);
     saveRecords();
     pushToGithub({ type: "delete", id });
