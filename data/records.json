@@ -1,0 +1,389 @@
+[
+  {
+    "id": "seed-1",
+    "date": "2026-08-15",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-2",
+    "date": "2026-08-15",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-3",
+    "date": "2026-08-15",
+    "exercise": "スミスベンチ",
+    "weight": 70,
+    "reps": 3,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-4",
+    "date": "2026-08-15",
+    "exercise": "スミスベンチ",
+    "weight": 75,
+    "reps": 2,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-5",
+    "date": "2026-08-15",
+    "exercise": "スミスサポーテッドロー",
+    "weight": 35,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-6",
+    "date": "2026-08-15",
+    "exercise": "バイク",
+    "weight": 7,
+    "reps": 10,
+    "sets": 1,
+    "memo": "有酸素"
+  },
+  {
+    "id": "seed-7",
+    "date": "2026-08-12",
+    "exercise": "バイク",
+    "weight": 6,
+    "reps": 12,
+    "sets": 1,
+    "memo": "有酸素"
+  },
+  {
+    "id": "seed-8",
+    "date": "2026-08-12",
+    "exercise": "スミスベンチ",
+    "weight": 50,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-9",
+    "date": "2026-08-12",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-10",
+    "date": "2026-08-12",
+    "exercise": "スミスベンチ",
+    "weight": 70,
+    "reps": 4,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-11",
+    "date": "2026-08-12",
+    "exercise": "スミスベンチ",
+    "weight": 70,
+    "reps": 5,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-12",
+    "date": "2026-08-12",
+    "exercise": "スミスベンチ",
+    "weight": 70,
+    "reps": 4,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-13",
+    "date": "2026-08-12",
+    "exercise": "スミスサポーテッドロー",
+    "weight": 30,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-14",
+    "date": "2026-08-12",
+    "exercise": "スミスアームカール",
+    "weight": 20,
+    "reps": 10,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-15",
+    "date": "2026-08-12",
+    "exercise": "スミスアームカール",
+    "weight": 25,
+    "reps": 10,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-16",
+    "date": "2026-08-12",
+    "exercise": "スミスアームカール",
+    "weight": 30,
+    "reps": 12,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-17",
+    "date": "2026-08-08",
+    "exercise": "スミスベンチ",
+    "weight": 50,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-18",
+    "date": "2026-08-08",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-19",
+    "date": "2026-08-08",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 5,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-20",
+    "date": "2026-08-08",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 10,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-21",
+    "date": "2026-08-08",
+    "exercise": "スミスベントオーバーロー",
+    "weight": 52.5,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-22",
+    "date": "2026-08-05",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 8,
+    "sets": 2,
+    "memo": ""
+  },
+  {
+    "id": "seed-23",
+    "date": "2026-08-05",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 6,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-24",
+    "date": "2026-08-05",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 4,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-25",
+    "date": "2026-08-05",
+    "exercise": "スミスベントオーバーロー",
+    "weight": 52.5,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-26",
+    "date": "2026-08-05",
+    "exercise": "スミスアームカール",
+    "weight": 20,
+    "reps": 10,
+    "sets": 2,
+    "memo": ""
+  },
+  {
+    "id": "seed-27",
+    "date": "2026-08-02",
+    "exercise": "バイク",
+    "weight": 5,
+    "reps": 10,
+    "sets": 1,
+    "memo": "有酸素"
+  },
+  {
+    "id": "seed-28",
+    "date": "2026-08-02",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-29",
+    "date": "2026-08-02",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-30",
+    "date": "2026-08-02",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 5,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-31",
+    "date": "2026-08-02",
+    "exercise": "スミスベンチ",
+    "weight": 62.5,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-32",
+    "date": "2026-08-02",
+    "exercise": "スミスベンチ",
+    "weight": 62.5,
+    "reps": 2,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-33",
+    "date": "2026-08-02",
+    "exercise": "スミスベントオーバーロー",
+    "weight": 52.5,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-34",
+    "date": "2026-08-02",
+    "exercise": "アームカール",
+    "weight": 10,
+    "reps": 10,
+    "sets": 2,
+    "memo": ""
+  },
+  {
+    "id": "seed-35",
+    "date": "2026-07-25",
+    "exercise": "バイク",
+    "weight": 5,
+    "reps": 11,
+    "sets": 1,
+    "memo": "有酸素"
+  },
+  {
+    "id": "seed-36",
+    "date": "2026-07-25",
+    "exercise": "スミスベンチ",
+    "weight": 50,
+    "reps": 5,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-37",
+    "date": "2026-07-25",
+    "exercise": "スミスベンチ",
+    "weight": 65,
+    "reps": 7,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-38",
+    "date": "2026-07-25",
+    "exercise": "スミスベンチ",
+    "weight": 70,
+    "reps": 3,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-39",
+    "date": "2026-07-25",
+    "exercise": "スミスベンチ",
+    "weight": 62.5,
+    "reps": 6,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-40",
+    "date": "2026-07-25",
+    "exercise": "スミスベンチ",
+    "weight": 60,
+    "reps": 7,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "seed-41",
+    "date": "2026-07-25",
+    "exercise": "ジャンプ",
+    "weight": 0,
+    "reps": 10,
+    "sets": 1,
+    "memo": "有酸素"
+  },
+  {
+    "id": "seed-42",
+    "date": "2026-07-25",
+    "exercise": "スミスベントオーバーロー",
+    "weight": 50,
+    "reps": 8,
+    "sets": 3,
+    "memo": ""
+  },
+  {
+    "id": "seed-43",
+    "date": "2026-07-25",
+    "exercise": "アームカール",
+    "weight": 10,
+    "reps": 10,
+    "sets": 2,
+    "memo": ""
+  }
+]
