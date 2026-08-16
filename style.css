@@ -153,6 +153,69 @@ input:focus, select:focus {
   filter: brightness(1.08);
 }
 
+.btn-secondary {
+  background: var(--text-secondary);
+}
+
+#import-details {
+  margin-top: 16px;
+  border-top: 1px solid var(--gridline);
+  padding-top: 12px;
+}
+
+#import-details summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.import-help {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.import-help code {
+  background: var(--page-plane);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 0.78rem;
+}
+
+#import-text {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.import-result {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--page-plane);
+}
+
+.import-result .import-success {
+  color: var(--status-good);
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.import-result .import-warnings {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--status-critical);
+}
+
+.import-result .import-warnings li {
+  margin-bottom: 2px;
+}
+
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

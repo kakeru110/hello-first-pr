@@ -22,6 +22,9 @@
   const chartEmpty = document.getElementById("chart-empty");
   const chartTooltip = document.getElementById("chart-tooltip");
   const chartContainer = document.getElementById("chart-container");
+  const importText = document.getElementById("import-text");
+  const importBtn = document.getElementById("import-btn");
+  const importResult = document.getElementById("import-result");
 
   dateInput.value = todayISO();
 
@@ -62,6 +65,108 @@
 
   filterExercise.addEventListener("change", renderHistory);
   chartExercise.addEventListener("change", renderChart);
+
+  importBtn.addEventListener("click", function () {
+    const { parsed, warnings } = parseBulkLog(importText.value);
+    if (parsed.length) {
+      records = records.concat(parsed);
+      saveRecords();
+      renderAll();
+    }
+    renderImportResult(parsed.length, warnings);
+    if (parsed.length && !warnings.length) {
+      importText.value = "";
+    }
+  });
+
+  function renderImportResult(count, warnings) {
+    importResult.hidden = false;
+    const successHtml = count
+      ? `<p class="import-success">${count}件を追加しました</p>`
+      : `<p class="import-success" style="color:var(--status-critical)">取り込める記録が見つかりませんでした</p>`;
+    const warningsHtml = warnings.length
+      ? `<ul class="import-warnings">${warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul>`
+      : "";
+    importResult.innerHTML = successHtml + warningsHtml;
+  }
+
+  // 「YYMMDD場所」の見出し行 + 「種目名 重量-回数, 重量-回数, .../」形式のテキストを
+  // records と同じ形の配列にパースする。同じ重量・回数が連続する行は sets にまとめる。
+  function parseBulkLog(text) {
+    const parsed = [];
+    const warnings = [];
+    const blocks = text.trim().split(/\n\s*\n/).filter((b) => b.trim());
+
+    blocks.forEach((block) => {
+      const lines = block
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      if (!lines.length) return;
+
+      const headerMatch = lines[0].match(/^(\d{2})(\d{2})(\d{2})/);
+      if (!headerMatch) {
+        warnings.push(`日付を認識できませんでした: "${lines[0]}"`);
+        return;
+      }
+      const date = `20${headerMatch[1]}-${headerMatch[2]}-${headerMatch[3]}`;
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].replace(/\/\s*$/, "").trim();
+        if (!line) continue;
+
+        const nameMatch = line.match(/^([^\d]+)/);
+        if (!nameMatch) {
+          warnings.push(`種目名を認識できませんでした: "${line}" (${date})`);
+          continue;
+        }
+        const exercise = nameMatch[1].trim();
+        const tokens = line
+          .slice(nameMatch[0].length)
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        if (!tokens.length) {
+          warnings.push(`重量・回数を認識できませんでした: "${line}" (${date})`);
+          continue;
+        }
+
+        const sets = [];
+        tokens.forEach((tok) => {
+          let m;
+          if ((m = tok.match(/^(\d+(?:\.\d+)?)-(\d+)$/))) {
+            sets.push({ weight: parseFloat(m[1]), reps: parseInt(m[2], 10) });
+          } else if ((m = tok.match(/^(\d+(?:\.\d+)?)$/))) {
+            sets.push({ weight: 0, reps: parseInt(m[1], 10) });
+          } else {
+            warnings.push(`認識できないデータを除外しました: "${exercise} ${tok}" (${date})`);
+          }
+        });
+
+        const isCardio = /バイク|ジャンプ|ラン|エアロ|有酸素/.test(exercise);
+        let idx = 0;
+        while (idx < sets.length) {
+          let end = idx + 1;
+          while (end < sets.length && sets[end].weight === sets[idx].weight && sets[end].reps === sets[idx].reps) {
+            end++;
+          }
+          parsed.push({
+            id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}-${idx}`,
+            date,
+            exercise,
+            weight: sets[idx].weight,
+            reps: sets[idx].reps,
+            sets: end - idx,
+            memo: isCardio ? "有酸素" : "",
+          });
+          idx = end;
+        }
+      }
+    });
+
+    return { parsed, warnings };
+  }
 
   function loadRecords() {
     try {
