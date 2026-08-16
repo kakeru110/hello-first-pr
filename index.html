@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筋トレ記録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>筋トレ記録</h1>
+  <p class="subtitle">種目・重量・回数を記録して、成長をグラフで確認できます</p>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="sync-heading">
+    <details id="sync-details">
+      <summary id="sync-heading">GitHub同期の設定</summary>
+      <p class="import-help">
+        GitHub の個人アクセストークンを登録すると、記録が <code>kakeru110/hello-first-pr</code> リポジトリの
+        <code>data/records.json</code> に保存され、同じトークンを登録した端末どうしで記録が同期されます。
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">トークン発行ページ</a>
+        で対象リポジトリをこのリポジトリのみに限定し、Contents 権限を Read and write にして発行してください。
+      </p>
+      <div class="field-row">
+        <label for="github-token">個人アクセストークン</label>
+        <input type="password" id="github-token" placeholder="github_pat_... または ghp_...">
+      </div>
+      <div class="sync-actions">
+        <button type="button" id="github-save-btn" class="btn-primary">保存して同期</button>
+        <button type="button" id="github-disconnect-btn" class="btn-primary btn-secondary">同期を解除</button>
+      </div>
+      <p id="sync-status" class="sync-status">GitHub同期: 無効（この端末内にのみ保存されます）</p>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="form-heading">
+    <h2 id="form-heading">記録を追加</h2>
+    <form id="record-form">
+      <div class="field-row">
+        <label for="date">日付</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field-row">
+        <label for="exercise">種目</label>
+        <input type="text" id="exercise" list="exercise-options" placeholder="例: ベンチプレス" required>
+        <datalist id="exercise-options"></datalist>
+      </div>
+      <div class="field-row triple">
+        <div>
+          <label for="weight">重量 (kg)</label>
+          <input type="number" id="weight" min="0" step="0.5" required>
+        </div>
+        <div>
+          <label for="reps">回数</label>
+          <input type="number" id="reps" min="1" step="1" required>
+        </div>
+        <div>
+          <label for="sets">セット数</label>
+          <input type="number" id="sets" min="1" step="1" value="1" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <label for="memo">メモ (任意)</label>
+        <input type="text" id="memo" placeholder="フォームの気づきなど">
+      </div>
+      <button type="submit" class="btn-primary">追加する</button>
+    </form>
+
+    <details id="import-details">
+      <summary>テキストで一括インポート</summary>
+      <p class="import-help">
+        <code>YYMMDD場所</code> の見出し行の下に <code>種目名 重量-回数, 重量-回数, ...</code> を1行ずつ書くと、まとめて取り込めます。
+        重量のない種目（有酸素運動など）は <code>回数</code> だけでも構いません。
+      </p>
+      <textarea id="import-text" rows="8" placeholder="260815家&#10;スミスベンチ60-8, 65-8, 70-3, 75-2&#10;スミスサポーテッドロー35-8, 35-8, 35-8&#10;バイク7-10"></textarea>
+      <button type="button" id="import-btn" class="btn-primary btn-secondary">インポート</button>
+      <div id="import-result" class="import-result" hidden></div>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="stats-heading">
+    <h2 id="stats-heading">概要</h2>
+    <div class="stat-tiles" id="stat-tiles"></div>
+  </section>
+
+  <section class="card" aria-labelledby="chart-heading">
+    <h2 id="chart-heading">進捗グラフ</h2>
+    <div class="chart-controls">
+      <label for="chart-exercise">種目を選択</label>
+      <select id="chart-exercise"></select>
+    </div>
+    <div id="chart-container">
+      <p id="chart-empty" class="empty-message">記録がまだありません</p>
+      <svg id="progress-chart" viewBox="0 0 640 260" role="img" aria-labelledby="chart-heading" style="display:none"></svg>
+      <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="history-heading">
+    <div class="history-header">
+      <h2 id="history-heading">記録一覧</h2>
+      <select id="filter-exercise">
+        <option value="">すべての種目</option>
+      </select>
+    </div>
+    <div id="history-list"></div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
