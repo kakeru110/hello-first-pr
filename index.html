@@ -43,8 +43,13 @@
       </div>
       <div class="field-row">
         <label for="exercise">種目</label>
-        <input type="text" id="exercise" list="exercise-options" placeholder="例: ベンチプレス" required>
-        <datalist id="exercise-options"></datalist>
+        <div class="exercise-select-row">
+          <select id="exercise" required></select>
+          <a href="exercises.html" class="add-exercise-link">+ 種目を追加</a>
+        </div>
+        <p id="no-exercise-hint" class="import-help" hidden>
+          まだ種目が登録されていません。<a href="exercises.html">種目の管理ページ</a>で先に種目を追加してください。
+        </p>
       </div>
       <div class="field-row triple">
         <div>
@@ -64,7 +69,7 @@
         <label for="memo">メモ (任意)</label>
         <input type="text" id="memo" placeholder="フォームの気づきなど">
       </div>
-      <button type="submit" class="btn-primary">追加する</button>
+      <button type="submit" id="add-record-btn" class="btn-primary">追加する</button>
     </form>
 
     <details id="import-details">
@@ -87,8 +92,19 @@
   <section class="card" aria-labelledby="chart-heading">
     <h2 id="chart-heading">進捗グラフ</h2>
     <div class="chart-controls">
-      <label for="chart-exercise">種目を選択</label>
-      <select id="chart-exercise"></select>
+      <div class="chart-control-item">
+        <label for="chart-exercise">種目</label>
+        <select id="chart-exercise"></select>
+      </div>
+      <div class="chart-control-item">
+        <label for="chart-metric">指標</label>
+        <select id="chart-metric">
+          <option value="volume" selected>ボリューム（重量×回数×セット）</option>
+          <option value="weight">最大重量</option>
+          <option value="reps">総回数</option>
+          <option value="sets">総セット数</option>
+        </select>
+      </div>
     </div>
     <div id="chart-container">
       <p id="chart-empty" class="empty-message">記録がまだありません</p>
@@ -112,6 +128,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
+<script src="sync.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

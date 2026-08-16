@@ -123,6 +123,43 @@ label {
   color: var(--text-secondary);
 }
 
+.exercise-select-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exercise-select-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-exercise-link {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--series-1);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.add-exercise-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb {
+  margin: 0 0 8px;
+}
+
+.breadcrumb a {
+  font-size: 0.85rem;
+  color: var(--series-1);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
 input, select {
   font: inherit;
   padding: 10px 12px;
@@ -151,6 +188,17 @@ input:focus, select:focus {
 
 .btn-primary:hover {
   filter: brightness(1.08);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -287,17 +335,27 @@ input:focus, select:focus {
 
 .chart-controls {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
-.chart-controls label {
-  white-space: nowrap;
+.chart-control-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
 }
 
-.chart-controls select {
+.chart-control-item label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chart-control-item select {
   flex: 1;
+  min-width: 0;
 }
 
 #chart-container {
@@ -323,12 +381,32 @@ input:focus, select:focus {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 0.8rem;
   color: var(--text-primary);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translate(-50%, -110%);
+  transform: translate(-50%, -112%);
   white-space: nowrap;
+  line-height: 1.5;
+}
+
+.chart-tooltip .tooltip-date {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+}
+
+.chart-tooltip .tooltip-row {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tooltip .tooltip-detail {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--gridline);
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 .history-header {
@@ -347,20 +425,106 @@ input:focus, select:focus {
   max-width: 50%;
 }
 
-.day-group {
-  margin-bottom: 16px;
+.day-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: var(--page-plane);
 }
 
-.day-group:last-child {
+.day-card:last-child {
   margin-bottom: 0;
 }
 
-.day-group h3 {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin: 0 0 8px;
+.day-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.day-card-header h3 {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 0;
   font-variant-numeric: tabular-nums;
+}
+
+.exercise-group {
+  padding: 8px 0;
+  border-top: 1px solid var(--gridline);
+}
+
+.day-card .exercise-group:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.exercise-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.exercise-group-name {
+  font-weight: 600;
+}
+
+.volume-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--series-1);
+  background: color-mix(in srgb, var(--series-1) 14%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.volume-badge-day {
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+}
+
+.set-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.set-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 4px 4px 10px;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.set-chip-delete {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.set-chip-delete:hover {
+  background: var(--page-plane);
+  color: var(--status-critical);
 }
 
 .record-item {
@@ -372,7 +536,7 @@ input:focus, select:focus {
   border-top: 1px solid var(--gridline);
 }
 
-.day-group .record-item:first-of-type {
+#exercise-list .record-item:first-child {
   border-top: none;
 }
 
@@ -386,13 +550,9 @@ input:focus, select:focus {
   font-weight: 600;
 }
 
-.record-detail {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
 .record-memo {
+  display: block;
+  margin-top: 4px;
   font-size: 0.8rem;
   color: var(--text-muted);
 }
