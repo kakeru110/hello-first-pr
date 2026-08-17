@@ -11,7 +11,7 @@
   const SEED_EXERCISES = ["アームカール", "ジャンプ", "スミスアームカール", "スミスサポーテッドロー", "スミスベンチ", "スミスベントオーバーロー", "バイク"];
 
   const CHART_WIDTH = 640;
-  const CHART_MARGIN = { top: 10, right: 12, left: 36 };
+  const CHART_MARGIN = { top: 14, right: 12, left: 40 };
 
   /** @type {{id:string,date:string,exercise:string,weight:number,reps:number,sets:number,memo:string}[]} */
   let records = loadRecords();
@@ -643,9 +643,11 @@
         const y = yFor(s.reps);
         const r = rFor(s.weight);
         const hitSize = Math.min(20, Math.max(14, r * 2 + 6));
+        const labelY = Math.max(7, y - r - 3);
         dots += `
           <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
             <circle class="scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
+            <text class="scatter-dot-label" x="${x.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle">${setIndex + 1}</text>
             <rect class="chart-hit" x="${(x - hitSize / 2).toFixed(1)}" y="${(y - hitSize / 2).toFixed(1)}" width="${hitSize}" height="${hitSize}"></rect>
           </g>
         `;
@@ -689,9 +691,12 @@
       .map((p, i) => {
         const x = xFor(i);
         const y = yFor(p.volume);
+        // 両端の棒は軸ラベルやグラフ端にはみ出さないよう、中心位置は保ちつつ内側にクランプする
+        const barLeft = Math.max(0, x - barWidth / 2);
+        const barRight = Math.min(plotW, x + barWidth / 2);
         return `
           <g class="chart-mark" data-date-index="${i}">
-            <rect class="volume-bar" x="${(x - barWidth / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth}" height="${(plotH - y).toFixed(1)}"></rect>
+            <rect class="volume-bar" x="${barLeft.toFixed(1)}" y="${y.toFixed(1)}" width="${(barRight - barLeft).toFixed(1)}" height="${(plotH - y).toFixed(1)}"></rect>
             <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
           </g>
         `;
