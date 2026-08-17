@@ -47,10 +47,6 @@
     <h2 id="form-heading">記録を追加</h2>
     <form id="record-form">
       <div class="field-row">
-        <label for="date">日付</label>
-        <input type="date" id="date" required>
-      </div>
-      <div class="field-row">
         <label for="exercise">種目</label>
         <div class="exercise-select-row">
           <select id="exercise" required></select>
@@ -60,7 +56,11 @@
           まだ種目が登録されていません。<a href="exercises.html">種目の管理ページ</a>で先に種目を追加してください。
         </p>
       </div>
-      <div class="field-row pair">
+      <div class="field-row inline">
+        <div>
+          <label for="date">日付</label>
+          <input type="date" id="date" required>
+        </div>
         <div>
           <label for="weight">重量 (kg)</label>
           <input type="number" id="weight" min="0" step="0.5" required>

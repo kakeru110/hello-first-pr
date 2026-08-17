@@ -137,16 +137,26 @@ main {
   gap: 4px;
 }
 
-.field-row.pair {
+.field-row.inline {
   flex-direction: row;
-  gap: 12px;
+  gap: 8px;
 }
 
-.field-row.pair > div {
+.field-row.inline > div {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.field-row.inline > div:first-child {
+  flex: 2;
+}
+
+.field-row.inline input {
+  padding-left: 8px;
+  padding-right: 4px;
 }
 
 label {
@@ -706,10 +716,6 @@ select:disabled {
 }
 
 @media (max-width: 400px) {
-  .field-row.pair {
-    flex-direction: column;
-  }
-
   .stat-tiles {
     grid-template-columns: 1fr;
   }
