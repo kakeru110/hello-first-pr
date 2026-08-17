@@ -708,6 +708,22 @@ select:disabled {
   filter: brightness(1.15);
 }
 
+.avg-line {
+  fill: none;
+  stroke: var(--series-1);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.avg-point {
+  fill: var(--series-1);
+}
+
+.chart-mark:hover .avg-point {
+  r: 4.5;
+}
+
 .chart-axis-label {
   fill: var(--text-muted);
   font-size: 10px;
