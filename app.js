@@ -33,8 +33,7 @@
   const chartExercise = document.getElementById("chart-exercise");
   const historyList = document.getElementById("history-list");
   const chartPanels = document.getElementById("chart-panels");
-  const chartWeightSvg = document.getElementById("chart-weight");
-  const chartRepsSvg = document.getElementById("chart-reps");
+  const chartWeightRepsSvg = document.getElementById("chart-weight-reps");
   const chartVolumeSvg = document.getElementById("chart-volume");
   const chartEmpty = document.getElementById("chart-empty");
   const chartContainer = document.getElementById("chart-container");
@@ -535,45 +534,26 @@
       .join("");
   }
 
-  function computeBoxStats(values) {
-    const sorted = values.slice().sort((a, b) => a - b);
-    const n = sorted.length;
-    function quantile(q) {
-      if (n === 1) return sorted[0];
-      const pos = (n - 1) * q;
-      const base = Math.floor(pos);
-      const rest = pos - base;
-      return sorted[base + 1] !== undefined ? sorted[base] + rest * (sorted[base + 1] - sorted[base]) : sorted[base];
-    }
-    return { min: sorted[0], q1: quantile(0.25), median: quantile(0.5), q3: quantile(0.75), max: sorted[n - 1], n };
-  }
-
+  // 日付ごとに、その日行った個々のセット(重量・回数の組)を配列で保持する。
+  // sets:3 の記録は同じ重量・回数を3個に展開し、実際に行ったセット数と1対1にする。
   function computeChartData(exercise) {
     const byDate = new Map();
     records
       .filter((r) => r.exercise === exercise)
       .forEach((r) => {
         if (!byDate.has(r.date)) {
-          byDate.set(r.date, { date: r.date, weights: [], reps: [], volume: 0, segments: [] });
+          byDate.set(r.date, { date: r.date, sets: [], volume: 0, segments: [] });
         }
         const entry = byDate.get(r.date);
         for (let i = 0; i < r.sets; i++) {
-          entry.weights.push(r.weight);
-          entry.reps.push(r.reps);
+          entry.sets.push({ weight: r.weight, reps: r.reps });
         }
         entry.volume += r.weight * r.reps * r.sets;
         entry.segments.push(setLabel(r));
       });
     return Array.from(byDate.values())
-      .map((e) => ({
-        date: e.date,
-        weightStats: computeBoxStats(e.weights),
-        repsStats: computeBoxStats(e.reps),
-        volume: e.volume,
-        segments: e.segments,
-        totalSets: e.weights.length,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((e, dateIndex) => Object.assign({ dateIndex, totalSets: e.sets.length }, e));
   }
 
   function renderChart() {
@@ -590,8 +570,7 @@
     chartEmpty.style.display = "none";
     chartPanels.style.display = "flex";
 
-    renderBoxPanel(chartWeightSvg, points, (p) => p.weightStats, 100, false);
-    renderBoxPanel(chartRepsSvg, points, (p) => p.repsStats, 100, false);
+    renderWeightRepsPanel(chartWeightRepsSvg, points, 130);
     renderVolumePanel(chartVolumeSvg, points, 130);
   }
 
@@ -610,85 +589,86 @@
     return dateLabels;
   }
 
-  function attachMarkTooltips(svgEl) {
-    svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
-      mark.addEventListener("mouseenter", showTooltip);
-      mark.addEventListener("mousemove", showTooltip);
-      mark.addEventListener("mouseleave", hideTooltip);
-      mark.addEventListener("touchstart", showTooltip, { passive: true });
-    });
-  }
-
-  // 重量・回数を「最小〜最大・中央値」の箱ヒゲ図で表示するパネル
-  function renderBoxPanel(svgEl, points, getStats, height, showDateLabels) {
+  // 重量を縦位置、回数を点の大きさで表す散布図。同じ日の複数セットは
+  // 横に少しずらして(ジッター)並べるので、実際に行った1セットずつが点として見える。
+  function renderWeightRepsPanel(svgEl, points, height) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
-    const plotH = height - CHART_MARGIN.top - (showDateLabels ? 20 : 4);
+    const plotH = height - CHART_MARGIN.top - 20;
 
-    const allValues = points.flatMap((p) => {
-      const s = getStats(p);
-      return [s.min, s.max];
-    });
-    let minV = Math.min(...allValues);
-    let maxV = Math.max(...allValues);
-    if (minV === maxV) {
-      minV -= 1;
-      maxV += 1;
+    const allWeights = points.flatMap((p) => p.sets.map((s) => s.weight));
+    let minW = Math.min(...allWeights);
+    let maxW = Math.max(...allWeights);
+    if (minW === maxW) {
+      minW -= 1;
+      maxW += 1;
     }
-    const pad = (maxV - minV) * 0.2;
-    minV -= pad;
-    maxV += pad;
+    const pad = (maxW - minW) * 0.2;
+    minW -= pad;
+    maxW += pad;
+
+    const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
+    const minReps = Math.min(...allReps);
+    const maxReps = Math.max(...allReps);
 
     const xFor = (i) => xForPanel(i, points.length, plotW);
-    const yFor = (v) => plotH - ((v - minV) / (maxV - minV)) * plotH;
+    const yFor = (w) => plotH - ((w - minW) / (maxW - minW)) * plotH;
+    const rFor = (reps) => {
+      if (maxReps === minReps) return 6;
+      const t = (reps - minReps) / (maxReps - minReps);
+      return 3 + Math.sqrt(t) * 6;
+    };
 
     const gridCount = 3;
     let gridlines = "";
     let axisLabels = "";
     for (let i = 0; i <= gridCount; i++) {
-      const v = minV + ((maxV - minV) * i) / gridCount;
+      const v = minW + ((maxW - minW) * i) / gridCount;
       const y = yFor(v);
       gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
       axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
     }
 
-    const boxWidth = Math.min(16, (plotW / points.length) * 0.5);
-    const marks = points
-      .map((p, i) => {
-        const s = getStats(p);
-        const x = xFor(i);
-        const yMin = yFor(s.min);
-        const yMax = yFor(s.max);
-        const yQ1 = yFor(s.q1);
-        const yQ3 = yFor(s.q3);
-        const yMed = yFor(s.median);
-        const boxTop = Math.min(yQ1, yQ3);
-        const boxHeight = Math.max(Math.abs(yQ3 - yQ1), 1.5);
-        return `
-          <g class="chart-mark" data-index="${i}">
-            <line class="box-whisker" x1="${x}" y1="${yMin}" x2="${x}" y2="${yMax}"></line>
-            <rect class="box-rect" x="${(x - boxWidth / 2).toFixed(1)}" y="${boxTop.toFixed(1)}" width="${boxWidth}" height="${boxHeight.toFixed(1)}"></rect>
-            <line class="box-median" x1="${(x - boxWidth / 2).toFixed(1)}" y1="${yMed.toFixed(1)}" x2="${(x + boxWidth / 2).toFixed(1)}" y2="${yMed.toFixed(1)}"></line>
-            <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
+    const jitterSpacing = Math.min(7, (plotW / Math.max(points.length - 1, 1)) * 0.35);
+
+    let dots = "";
+    points.forEach((p, dateIndex) => {
+      const baseX = xFor(dateIndex);
+      const n = p.sets.length;
+      p.sets.forEach((s, setIndex) => {
+        const offset = n > 1 ? (setIndex - (n - 1) / 2) * jitterSpacing : 0;
+        const x = baseX + offset;
+        const y = yFor(s.weight);
+        const r = rFor(s.reps);
+        dots += `
+          <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
+            <circle class="scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
+            <rect class="chart-hit" x="${(x - 11).toFixed(1)}" y="${(y - 11).toFixed(1)}" width="22" height="22"></rect>
           </g>
         `;
-      })
-      .join("");
+      });
+    });
 
-    const dateLabels = showDateLabels ? renderDateLabels(points, xFor, plotH) : "";
+    const dateLabels = renderDateLabels(points, xFor, plotH);
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
         ${gridlines}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
         ${axisLabels}
-        ${marks}
+        ${dots}
         ${dateLabels}
       </g>
     `;
-    attachMarkTooltips(svgEl);
+
+    svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
+      mark.addEventListener("mouseenter", showSetTooltip);
+      mark.addEventListener("mousemove", showSetTooltip);
+      mark.addEventListener("mouseleave", hideTooltip);
+      mark.addEventListener("touchstart", showSetTooltip, { passive: true });
+    });
   }
 
-  // ボリューム(重量×回数×セット)を棒グラフで表示するパネル。3パネルとも同じ
+  // ボリューム(重量×回数×セット)を棒グラフで表示するパネル。上のパネルと同じ
   // x位置(=同じ日付)を共有しているので、縦に見比べれば実質「同じグラフ」として読める。
   function renderVolumePanel(svgEl, points, height) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
@@ -715,7 +695,7 @@
         const x = xFor(i);
         const y = yFor(p.volume);
         return `
-          <g class="chart-mark" data-index="${i}">
+          <g class="chart-mark" data-date-index="${i}">
             <rect class="volume-bar" x="${(x - barWidth / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth}" height="${(plotH - y).toFixed(1)}"></rect>
             <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
           </g>
@@ -734,34 +714,57 @@
         ${dateLabels}
       </g>
     `;
-    attachMarkTooltips(svgEl);
+
+    svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
+      mark.addEventListener("mouseenter", showVolumeTooltip);
+      mark.addEventListener("mousemove", showVolumeTooltip);
+      mark.addEventListener("mouseleave", hideTooltip);
+      mark.addEventListener("touchstart", showVolumeTooltip, { passive: true });
+    });
   }
 
-  function showTooltip(e) {
-    const mark = e.currentTarget;
-    const index = parseInt(mark.getAttribute("data-index"), 10);
-    const p = currentChartPoints[index];
-    if (!p) return;
-
+  function positionTooltip(mark) {
     const svg = mark.closest("svg");
     const svgRect = svg.getBoundingClientRect();
     const containerRect = chartContainer.getBoundingClientRect();
     const hit = mark.querySelector(".chart-hit");
-    const x = parseFloat(hit.getAttribute("x")) + 16;
+    const hitWidth = parseFloat(hit.getAttribute("width"));
+    const x = parseFloat(hit.getAttribute("x")) + hitWidth / 2;
     const scaleX = svgRect.width / CHART_WIDTH;
 
-    const left = svgRect.left - containerRect.left + (x + CHART_MARGIN.left) * scaleX;
-    const top = svgRect.top - containerRect.top + 6;
+    chartTooltip.style.left = `${svgRect.left - containerRect.left + (x + CHART_MARGIN.left) * scaleX}px`;
+    chartTooltip.style.top = `${svgRect.top - containerRect.top + 6}px`;
+  }
 
+  function showSetTooltip(e) {
+    const mark = e.currentTarget;
+    const dateIndex = parseInt(mark.getAttribute("data-date-index"), 10);
+    const setIndex = parseInt(mark.getAttribute("data-set-index"), 10);
+    const p = currentChartPoints[dateIndex];
+    const s = p && p.sets[setIndex];
+    if (!s) return;
+
+    positionTooltip(mark);
     chartTooltip.innerHTML = `
       <div class="tooltip-date">${formatDate(p.date)}</div>
-      <div class="tooltip-row">重量: ${p.weightStats.min}〜${p.weightStats.max}kg（中央値 ${p.weightStats.median}）</div>
-      <div class="tooltip-row">回数: ${p.repsStats.min}〜${p.repsStats.max}回（中央値 ${p.repsStats.median}）</div>
+      <div class="tooltip-row">${s.weight}kg × ${s.reps}回（${setIndex + 1}/${p.totalSets}セット目）</div>
+      <div class="tooltip-detail">この日: ${escapeHtml(p.segments.join(", "))}</div>
+    `;
+    chartTooltip.hidden = false;
+  }
+
+  function showVolumeTooltip(e) {
+    const mark = e.currentTarget;
+    const dateIndex = parseInt(mark.getAttribute("data-date-index"), 10);
+    const p = currentChartPoints[dateIndex];
+    if (!p) return;
+
+    positionTooltip(mark);
+    chartTooltip.innerHTML = `
+      <div class="tooltip-date">${formatDate(p.date)}</div>
       <div class="tooltip-row">ボリューム: ${Math.round(p.volume)}kg／${p.totalSets}セット</div>
       <div class="tooltip-detail">${escapeHtml(p.segments.join(", "))}</div>
     `;
-    chartTooltip.style.left = `${left}px`;
-    chartTooltip.style.top = `${top}px`;
     chartTooltip.hidden = false;
   }
 

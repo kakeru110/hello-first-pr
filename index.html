@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ記録</title>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <header class="app-header">
@@ -99,15 +99,11 @@
     </div>
     <div id="chart-container">
       <p id="chart-empty" class="empty-message">記録がまだありません</p>
-      <p class="chart-panel-hint">各日の分布（最小〜最大・中央値）とボリュームを、日付を揃えて表示</p>
+      <p class="chart-panel-hint">同じ日の複数セットは横に少しずらして表示。●の大きさが回数を表します</p>
       <div id="chart-panels">
         <div class="chart-panel">
-          <p class="chart-panel-label">重量 (kg)</p>
-          <svg id="chart-weight" viewBox="0 0 640 100" role="img" aria-label="重量の分布"></svg>
-        </div>
-        <div class="chart-panel">
-          <p class="chart-panel-label">回数</p>
-          <svg id="chart-reps" viewBox="0 0 640 100" role="img" aria-label="回数の分布"></svg>
+          <p class="chart-panel-label">重量 (kg) ・ 回数(●の大きさ)</p>
+          <svg id="chart-weight-reps" viewBox="0 0 640 130" role="img" aria-label="重量と回数"></svg>
         </div>
         <div class="chart-panel">
           <p class="chart-panel-label">ボリューム (重量×回数×セット)</p>
@@ -133,7 +129,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="sync.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
