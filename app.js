@@ -13,6 +13,22 @@
   const CHART_WIDTH = 640;
   const CHART_MARGIN = { top: 14, right: 12, left: 40 };
 
+  // 種目名から部位を推定する(2週間平均を部位単位でまとめて見せるため)。
+  // 判定は上から優先度順、どれにも当てはまらなければ「その他」としてその種目単独で扱う。
+  const MUSCLE_GROUPS = [
+    { key: "cardio", label: "有酸素", test: MuscleSync.isCardioExercise },
+    { key: "chest", label: "胸", test: (n) => /ベンチ|チェストプレス|フライ/.test(n) },
+    { key: "back", label: "背中", test: (n) => /ロー|ラットプル|プルダウン|デッドリフト|懸垂/.test(n) },
+    { key: "shoulder", label: "肩", test: (n) => /ミリタリー|ショルダー/.test(n) },
+    { key: "arm", label: "腕", test: (n) => /カール|トライセプス/.test(n) },
+    { key: "leg", label: "脚", test: (n) => /スクワット|レッグ|ランジ/.test(n) },
+  ];
+
+  function categoryForExercise(name) {
+    const found = MUSCLE_GROUPS.find((g) => g.test(name));
+    return found ? { key: found.key, label: found.label } : { key: `other:${name}`, label: name };
+  }
+
   /** @type {{id:string,date:string,exercise:string,weight:number,reps:number,sets:number,memo:string}[]} */
   let records = loadRecords();
   /** @type {string[]} */
@@ -36,6 +52,7 @@
   const chartWeightRepsSvg = document.getElementById("chart-weight-reps");
   const chartVolumeSvg = document.getElementById("chart-volume");
   const chartVolumeAvgSvg = document.getElementById("chart-volume-avg");
+  const volumeAvgCategoryLabel = document.getElementById("volume-avg-category");
   const chartEmpty = document.getElementById("chart-empty");
   const chartContainer = document.getElementById("chart-container");
   const chartTooltip = document.getElementById("chart-tooltip");
@@ -557,6 +574,24 @@
       .map((e, dateIndex) => Object.assign({ dateIndex, totalSets: e.sets.length }, e));
   }
 
+  // computeChartData と同じ形の日別データを作るが、1種目ではなく同じ部位(category)に
+  // 属する全種目のボリュームをまとめて合算する。2週間平均を「胸」「背中」などで
+  // 種目をまたいで見たいという要望向け。
+  function computeCategoryChartData(category) {
+    const byDate = new Map();
+    records
+      .filter((r) => categoryForExercise(r.exercise).key === category.key)
+      .forEach((r) => {
+        if (!byDate.has(r.date)) {
+          byDate.set(r.date, { date: r.date, volume: 0 });
+        }
+        byDate.get(r.date).volume += r.weight * r.reps * r.sets;
+      });
+    return Array.from(byDate.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((e, dateIndex) => Object.assign({ dateIndex }, e));
+  }
+
   function renderChart() {
     const exercise = chartExercise.value;
     const points = computeChartData(exercise);
@@ -571,9 +606,13 @@
     chartEmpty.style.display = "none";
     chartPanels.style.display = "flex";
 
+    const category = categoryForExercise(exercise);
+    const categoryPoints = computeCategoryChartData(category);
+    volumeAvgCategoryLabel.textContent = category.key.startsWith("other:") ? "" : category.label;
+
     renderWeightRepsPanel(chartWeightRepsSvg, points, 130);
     renderVolumePanel(chartVolumeSvg, points, 130);
-    renderVolumeAvgPanel(chartVolumeAvgSvg, points, 130);
+    renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130);
   }
 
   function xForPanel(i, count, plotW) {
