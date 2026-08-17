@@ -10,7 +10,7 @@
   const EXERCISES_PATH = "data/exercises.json";
   const RECORDS_KEY = "muscleLog.records";
   const RECORDS_PATH = "data/records.json";
-  const SEED_EXERCISES = ["アームカール", "ジャンプ", "スミスアームカール", "スミスサポーテッドロー", "スミスベンチ", "スミスベントオーバーロー", "バイク"];
+  const SEED_EXERCISES = ["アームカール", "シーテッドロー", "ショルダープレス", "スクワット", "スミスアームカール", "スミスサポーテッドロー", "スミススクワット", "スミスベンチ", "スミスベントオーバーロー", "スミスミリタリー", "ダンベルベンチ", "チェストプレス", "デッドリフト", "ペクトラルフライ", "ベンチプレス", "ベントオーバーロー", "ミリタリー", "ラットプルダウン", "レッグプレス", "懸垂", "ジャンプ", "バイク", "ラン", "腕胸ジャンプ"];
 
   let exercises = loadExercises().sort(MuscleSync.compareExerciseNames);
   let records = loadRecords();
