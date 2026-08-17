@@ -355,31 +355,6 @@ select:disabled {
   color: var(--status-good);
 }
 
-.stat-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.stat-tile {
-  text-align: center;
-  padding: 8px 8px;
-  border-radius: 8px;
-  background: var(--page-plane);
-}
-
-.stat-tile .value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-tile .label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
 .chart-controls {
   display: flex;
   flex-wrap: wrap;
@@ -409,10 +384,30 @@ select:disabled {
   position: relative;
 }
 
-#progress-chart {
+#chart-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-panel svg {
   width: 100%;
   height: auto;
   overflow: visible;
+}
+
+.chart-panel-label {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.chart-panel-hint {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
 }
 
 .empty-message {
@@ -683,20 +678,51 @@ select:disabled {
   padding: 0 20px 32px;
 }
 
-.chart-line {
-  fill: none;
+.chart-mark {
+  cursor: pointer;
+}
+
+.chart-hit {
+  fill: transparent;
+}
+
+.box-whisker {
+  stroke: var(--series-1);
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+.box-rect {
+  fill: var(--series-1-tint);
+  stroke: var(--series-1);
+  stroke-width: 1.5;
+  rx: 2;
+}
+
+.box-median {
   stroke: var(--series-1);
   stroke-width: 2;
   stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
-.chart-point {
+.chart-mark:hover .box-rect {
   fill: var(--series-1);
+  fill-opacity: 0.28;
 }
 
-.chart-point:hover {
-  cursor: pointer;
+.chart-mark:hover .box-whisker,
+.chart-mark:hover .box-median {
+  opacity: 1;
+}
+
+.volume-bar {
+  fill: var(--series-1);
+  rx: 2;
+}
+
+.chart-mark:hover .volume-bar {
+  fill: var(--series-1);
+  filter: brightness(1.15);
 }
 
 .chart-axis-label {
@@ -715,8 +741,3 @@ select:disabled {
   stroke-width: 1;
 }
 
-@media (max-width: 400px) {
-  .stat-tiles {
-    grid-template-columns: 1fr;
-  }
-}
