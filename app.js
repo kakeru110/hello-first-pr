@@ -580,6 +580,24 @@
     return count === 1 ? plotW / 2 : (i / (count - 1)) * plotW;
   }
 
+  // 縦軸の目盛り線とラベルをまとめて作る。単位(unit)を付け、四捨五入した結果が
+  // 直前の目盛りと同じ値になる場合はそのラインごと省略する(値の幅が狭いと重複表示になるため)。
+  function renderValueAxis(plotW, minV, maxV, gridCount, yFor, unit) {
+    let gridlines = "";
+    let axisLabels = "";
+    let lastLabel = null;
+    for (let i = 0; i <= gridCount; i++) {
+      const v = minV + ((maxV - minV) * i) / gridCount;
+      const rounded = Math.round(v);
+      if (rounded === lastLabel) continue;
+      lastLabel = rounded;
+      const y = yFor(v);
+      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
+      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${rounded}${unit}</text>`;
+    }
+    return gridlines + axisLabels;
+  }
+
   function renderDateLabels(points, xFor, plotH) {
     const labelStep = Math.max(1, Math.ceil(points.length / 6));
     let dateLabels = "";
@@ -607,29 +625,13 @@
     };
 
     const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
-    let minReps = Math.min(...allReps);
-    let maxReps = Math.max(...allReps);
-    if (minReps === maxReps) {
-      minReps -= 1;
-      maxReps += 1;
-    }
-    const pad = (maxReps - minReps) * 0.2;
-    minReps -= pad;
-    maxReps += pad;
+    const maxReps = Math.max(...allReps) * 1.15;
 
     const xFor = (i) => xForPanel(i, points.length, plotW);
-    const yFor = (reps) => plotH - ((reps - minReps) / (maxReps - minReps)) * plotH;
+    const yFor = (reps) => plotH - (reps / maxReps) * plotH;
     const jitterSpacing = Math.min(7, (plotW / Math.max(points.length - 1, 1)) * 0.35);
 
-    const gridCount = 3;
-    let gridlines = "";
-    let axisLabels = "";
-    for (let i = 0; i <= gridCount; i++) {
-      const v = minReps + ((maxReps - minReps) * i) / gridCount;
-      const y = yFor(v);
-      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
-      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
-    }
+    const axis = renderValueAxis(plotW, 0, maxReps, 3, yFor, "回");
 
     let dots = "";
     points.forEach((p, dateIndex) => {
@@ -654,9 +656,8 @@
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
-        ${gridlines}
+        ${axis}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
-        ${axisLabels}
         ${dots}
         ${dateLabels}
       </g>
@@ -682,15 +683,7 @@
     const yFor = (v) => plotH - (v / maxV) * plotH;
     const barWidth = Math.min(22, (plotW / points.length) * 0.55);
 
-    const gridCount = 3;
-    let gridlines = "";
-    let axisLabels = "";
-    for (let i = 0; i <= gridCount; i++) {
-      const v = (maxV * i) / gridCount;
-      const y = yFor(v);
-      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
-      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
-    }
+    const axis = renderValueAxis(plotW, 0, maxV, 3, yFor, "kg");
 
     const bars = points
       .map((p, i) => {
@@ -709,9 +702,8 @@
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
-        ${gridlines}
+        ${axis}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
-        ${axisLabels}
         ${bars}
         ${dateLabels}
       </g>
@@ -763,15 +755,7 @@
     const xFor = (i) => xForPanel(i, points.length, plotW);
     const yFor = (v) => plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-    const gridCount = 3;
-    let gridlines = "";
-    let axisLabels = "";
-    for (let i = 0; i <= gridCount; i++) {
-      const v = minV + ((maxV - minV) * i) / gridCount;
-      const y = yFor(v);
-      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
-      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
-    }
+    const axis = renderValueAxis(plotW, minV, maxV, 3, yFor, "kg");
 
     const pathD = avgPoints
       .map((p, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(p.avg).toFixed(1)}`)
@@ -794,9 +778,8 @@
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
-        ${gridlines}
+        ${axis}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
-        ${axisLabels}
         <path class="avg-line" d="${pathD}"></path>
         ${marks}
         ${dateLabels}
