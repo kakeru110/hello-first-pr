@@ -12,7 +12,7 @@
   const RECORDS_PATH = "data/records.json";
   const SEED_EXERCISES = ["アームカール", "ジャンプ", "スミスアームカール", "スミスサポーテッドロー", "スミスベンチ", "スミスベントオーバーロー", "バイク"];
 
-  let exercises = loadExercises();
+  let exercises = loadExercises().sort(MuscleSync.compareExerciseNames);
   let records = loadRecords();
   let exercisesSha = null;
   let recordsSha = null;
@@ -41,7 +41,7 @@
       return;
     }
     exercises.push(name);
-    exercises.sort((a, b) => a.localeCompare(b, "ja"));
+    exercises.sort(MuscleSync.compareExerciseNames);
     saveExercises();
     pushExercisesToGithub({ type: "add", name });
     form.reset();
@@ -128,7 +128,7 @@
   async function renameExercise(oldName, newName) {
     exercises = exercises.filter((n) => n !== oldName);
     if (!exercises.includes(newName)) exercises.push(newName);
-    exercises.sort((a, b) => a.localeCompare(b, "ja"));
+    exercises.sort(MuscleSync.compareExerciseNames);
     saveExercises();
     render();
 
@@ -175,7 +175,7 @@
         exercisesSha = sha;
         setSyncStatus(`GitHub同期: 有効（この端末の種目で初期化しました・${MuscleSync.nowTime()}）`, false, true);
       } else {
-        exercises = result.data;
+        exercises = result.data.slice().sort(MuscleSync.compareExerciseNames);
         exercisesSha = result.sha;
         saveExercises();
         render();
@@ -213,7 +213,7 @@
         try {
           const result = await MuscleSync.getFile(token, EXERCISES_PATH);
           exercises = applyPendingChange(result.data, pendingChange);
-          exercises.sort((a, b) => a.localeCompare(b, "ja"));
+          exercises.sort(MuscleSync.compareExerciseNames);
           saveExercises();
           render();
           const sha2 = await MuscleSync.putFile(token, EXERCISES_PATH, exercises, result.sha, "Update exercise list (merged)");
