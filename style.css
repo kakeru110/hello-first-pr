@@ -698,6 +698,18 @@ select:disabled {
   stroke: var(--series-1);
 }
 
+.scatter-dot-label {
+  fill: var(--text-muted);
+  font-size: 8px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  pointer-events: none;
+}
+
+.chart-mark:hover .scatter-dot-label {
+  fill: var(--series-1);
+  font-weight: 600;
+}
+
 .volume-bar {
   fill: var(--series-1);
   rx: 2;
