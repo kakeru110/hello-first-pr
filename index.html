@@ -89,11 +89,6 @@
     </details>
   </section>
 
-  <section class="card" aria-labelledby="stats-heading">
-    <h2 id="stats-heading">概要</h2>
-    <div class="stat-tiles" id="stat-tiles"></div>
-  </section>
-
   <section class="card" aria-labelledby="chart-heading">
     <h2 id="chart-heading">進捗グラフ</h2>
     <div class="chart-controls">
@@ -101,19 +96,24 @@
         <label for="chart-exercise">種目</label>
         <select id="chart-exercise"></select>
       </div>
-      <div class="chart-control-item">
-        <label for="chart-metric">指標</label>
-        <select id="chart-metric">
-          <option value="volume" selected>ボリューム（重量×回数×セット）</option>
-          <option value="weight">最大重量</option>
-          <option value="reps">総回数</option>
-          <option value="sets">総セット数</option>
-        </select>
-      </div>
     </div>
     <div id="chart-container">
       <p id="chart-empty" class="empty-message">記録がまだありません</p>
-      <svg id="progress-chart" viewBox="0 0 640 260" role="img" aria-labelledby="chart-heading" style="display:none"></svg>
+      <p class="chart-panel-hint">各日の分布（最小〜最大・中央値）とボリュームを、日付を揃えて表示</p>
+      <div id="chart-panels">
+        <div class="chart-panel">
+          <p class="chart-panel-label">重量 (kg)</p>
+          <svg id="chart-weight" viewBox="0 0 640 100" role="img" aria-label="重量の分布"></svg>
+        </div>
+        <div class="chart-panel">
+          <p class="chart-panel-label">回数</p>
+          <svg id="chart-reps" viewBox="0 0 640 100" role="img" aria-label="回数の分布"></svg>
+        </div>
+        <div class="chart-panel">
+          <p class="chart-panel-label">ボリューム (重量×回数×セット)</p>
+          <svg id="chart-volume" viewBox="0 0 640 130" role="img" aria-label="ボリューム"></svg>
+        </div>
+      </div>
       <div id="chart-tooltip" class="chart-tooltip" hidden></div>
     </div>
   </section>

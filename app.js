@@ -10,12 +10,8 @@
   const SEED_RECORDS = [{"id":"seed-1","date":"2026-08-15","exercise":"スミスベンチ","weight":60,"reps":8,"sets":1,"memo":""},{"id":"seed-2","date":"2026-08-15","exercise":"スミスベンチ","weight":65,"reps":8,"sets":1,"memo":""},{"id":"seed-3","date":"2026-08-15","exercise":"スミスベンチ","weight":70,"reps":3,"sets":1,"memo":""},{"id":"seed-4","date":"2026-08-15","exercise":"スミスベンチ","weight":75,"reps":2,"sets":1,"memo":""},{"id":"seed-5","date":"2026-08-15","exercise":"スミスサポーテッドロー","weight":35,"reps":8,"sets":3,"memo":""},{"id":"seed-6","date":"2026-08-15","exercise":"バイク","weight":7,"reps":10,"sets":1,"memo":"有酸素"},{"id":"seed-7","date":"2026-08-12","exercise":"バイク","weight":6,"reps":12,"sets":1,"memo":"有酸素"},{"id":"seed-8","date":"2026-08-12","exercise":"スミスベンチ","weight":50,"reps":8,"sets":1,"memo":""},{"id":"seed-9","date":"2026-08-12","exercise":"スミスベンチ","weight":60,"reps":8,"sets":1,"memo":""},{"id":"seed-10","date":"2026-08-12","exercise":"スミスベンチ","weight":70,"reps":4,"sets":1,"memo":""},{"id":"seed-11","date":"2026-08-12","exercise":"スミスベンチ","weight":70,"reps":5,"sets":1,"memo":""},{"id":"seed-12","date":"2026-08-12","exercise":"スミスベンチ","weight":70,"reps":4,"sets":1,"memo":""},{"id":"seed-13","date":"2026-08-12","exercise":"スミスサポーテッドロー","weight":30,"reps":8,"sets":3,"memo":""},{"id":"seed-14","date":"2026-08-12","exercise":"スミスアームカール","weight":20,"reps":10,"sets":1,"memo":""},{"id":"seed-15","date":"2026-08-12","exercise":"スミスアームカール","weight":25,"reps":10,"sets":1,"memo":""},{"id":"seed-16","date":"2026-08-12","exercise":"スミスアームカール","weight":30,"reps":12,"sets":1,"memo":""},{"id":"seed-17","date":"2026-08-08","exercise":"スミスベンチ","weight":50,"reps":8,"sets":1,"memo":""},{"id":"seed-18","date":"2026-08-08","exercise":"スミスベンチ","weight":65,"reps":8,"sets":1,"memo":""},{"id":"seed-19","date":"2026-08-08","exercise":"スミスベンチ","weight":65,"reps":5,"sets":1,"memo":""},{"id":"seed-20","date":"2026-08-08","exercise":"スミスベンチ","weight":60,"reps":10,"sets":1,"memo":""},{"id":"seed-21","date":"2026-08-08","exercise":"スミスベントオーバーロー","weight":52.5,"reps":8,"sets":3,"memo":""},{"id":"seed-22","date":"2026-08-05","exercise":"スミスベンチ","weight":60,"reps":8,"sets":2,"memo":""},{"id":"seed-23","date":"2026-08-05","exercise":"スミスベンチ","weight":60,"reps":6,"sets":1,"memo":""},{"id":"seed-24","date":"2026-08-05","exercise":"スミスベンチ","weight":60,"reps":4,"sets":1,"memo":""},{"id":"seed-25","date":"2026-08-05","exercise":"スミスベントオーバーロー","weight":52.5,"reps":8,"sets":3,"memo":""},{"id":"seed-26","date":"2026-08-05","exercise":"スミスアームカール","weight":20,"reps":10,"sets":2,"memo":""},{"id":"seed-27","date":"2026-08-02","exercise":"バイク","weight":5,"reps":10,"sets":1,"memo":"有酸素"},{"id":"seed-28","date":"2026-08-02","exercise":"スミスベンチ","weight":60,"reps":8,"sets":1,"memo":""},{"id":"seed-29","date":"2026-08-02","exercise":"スミスベンチ","weight":65,"reps":8,"sets":1,"memo":""},{"id":"seed-30","date":"2026-08-02","exercise":"スミスベンチ","weight":65,"reps":5,"sets":1,"memo":""},{"id":"seed-31","date":"2026-08-02","exercise":"スミスベンチ","weight":62.5,"reps":8,"sets":1,"memo":""},{"id":"seed-32","date":"2026-08-02","exercise":"スミスベンチ","weight":62.5,"reps":2,"sets":1,"memo":""},{"id":"seed-33","date":"2026-08-02","exercise":"スミスベントオーバーロー","weight":52.5,"reps":8,"sets":3,"memo":""},{"id":"seed-34","date":"2026-08-02","exercise":"アームカール","weight":10,"reps":10,"sets":2,"memo":""},{"id":"seed-35","date":"2026-07-25","exercise":"バイク","weight":5,"reps":11,"sets":1,"memo":"有酸素"},{"id":"seed-36","date":"2026-07-25","exercise":"スミスベンチ","weight":50,"reps":5,"sets":1,"memo":""},{"id":"seed-37","date":"2026-07-25","exercise":"スミスベンチ","weight":65,"reps":7,"sets":1,"memo":""},{"id":"seed-38","date":"2026-07-25","exercise":"スミスベンチ","weight":70,"reps":3,"sets":1,"memo":""},{"id":"seed-39","date":"2026-07-25","exercise":"スミスベンチ","weight":62.5,"reps":6,"sets":1,"memo":""},{"id":"seed-40","date":"2026-07-25","exercise":"スミスベンチ","weight":60,"reps":7,"sets":1,"memo":""},{"id":"seed-41","date":"2026-07-25","exercise":"ジャンプ","weight":0,"reps":10,"sets":1,"memo":"有酸素"},{"id":"seed-42","date":"2026-07-25","exercise":"スミスベントオーバーロー","weight":50,"reps":8,"sets":3,"memo":""},{"id":"seed-43","date":"2026-07-25","exercise":"アームカール","weight":10,"reps":10,"sets":2,"memo":""}];
   const SEED_EXERCISES = ["アームカール", "ジャンプ", "スミスアームカール", "スミスサポーテッドロー", "スミスベンチ", "スミスベントオーバーロー", "バイク"];
 
-  const METRIC_CONFIG = {
-    volume: { label: "ボリューム", unit: "kg", getValue: (p) => p.volume },
-    weight: { label: "最大重量", unit: "kg", getValue: (p) => p.maxWeight },
-    reps: { label: "総回数", unit: "回", getValue: (p) => p.totalReps },
-    sets: { label: "総セット数", unit: "セット", getValue: (p) => p.totalSets },
-  };
+  const CHART_WIDTH = 640;
+  const CHART_MARGIN = { top: 10, right: 12, left: 36 };
 
   /** @type {{id:string,date:string,exercise:string,weight:number,reps:number,sets:number,memo:string}[]} */
   let records = loadRecords();
@@ -35,11 +31,13 @@
   const memoInput = document.getElementById("memo");
   const filterExercise = document.getElementById("filter-exercise");
   const chartExercise = document.getElementById("chart-exercise");
-  const chartMetric = document.getElementById("chart-metric");
   const historyList = document.getElementById("history-list");
-  const statTiles = document.getElementById("stat-tiles");
-  const chartSvg = document.getElementById("progress-chart");
+  const chartPanels = document.getElementById("chart-panels");
+  const chartWeightSvg = document.getElementById("chart-weight");
+  const chartRepsSvg = document.getElementById("chart-reps");
+  const chartVolumeSvg = document.getElementById("chart-volume");
   const chartEmpty = document.getElementById("chart-empty");
+  const chartContainer = document.getElementById("chart-container");
   const chartTooltip = document.getElementById("chart-tooltip");
   const importText = document.getElementById("import-text");
   const importBtn = document.getElementById("import-btn");
@@ -121,7 +119,6 @@
 
   filterExercise.addEventListener("change", renderHistory);
   chartExercise.addEventListener("change", renderChart);
-  chartMetric.addEventListener("change", renderChart);
 
   importBtn.addEventListener("click", function () {
     const { parsed, warnings } = parseBulkLog(importText.value);
@@ -425,7 +422,6 @@
   function renderAll(opts) {
     opts = opts || {};
     renderExerciseOptions(opts);
-    renderStats();
     renderHistory();
     renderChart();
   }
@@ -461,33 +457,6 @@
     } else if (usedNames.length) {
       chartExercise.value = usedNames[usedNames.length - 1];
     }
-  }
-
-  function renderStats() {
-    const totalRecords = records.length;
-    const exerciseCount = getUsedExerciseNames().length;
-
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
-    const recentDates = new Set(
-      records.filter((r) => new Date(r.date + "T00:00:00") >= sevenDaysAgo).map((r) => r.date)
-    );
-
-    statTiles.innerHTML = `
-      <div class="stat-tile">
-        <div class="value">${totalRecords}</div>
-        <div class="label">総記録数</div>
-      </div>
-      <div class="stat-tile">
-        <div class="value">${exerciseCount}</div>
-        <div class="label">種目数</div>
-      </div>
-      <div class="stat-tile">
-        <div class="value">${recentDates.size}</div>
-        <div class="label">直近7日の実施日</div>
-      </div>
-    `;
   }
 
   function setLabel(r) {
@@ -566,62 +535,113 @@
       .join("");
   }
 
+  function computeBoxStats(values) {
+    const sorted = values.slice().sort((a, b) => a - b);
+    const n = sorted.length;
+    function quantile(q) {
+      if (n === 1) return sorted[0];
+      const pos = (n - 1) * q;
+      const base = Math.floor(pos);
+      const rest = pos - base;
+      return sorted[base + 1] !== undefined ? sorted[base] + rest * (sorted[base + 1] - sorted[base]) : sorted[base];
+    }
+    return { min: sorted[0], q1: quantile(0.25), median: quantile(0.5), q3: quantile(0.75), max: sorted[n - 1], n };
+  }
+
   function computeChartData(exercise) {
     const byDate = new Map();
     records
       .filter((r) => r.exercise === exercise)
       .forEach((r) => {
         if (!byDate.has(r.date)) {
-          byDate.set(r.date, { date: r.date, maxWeight: 0, totalReps: 0, totalSets: 0, volume: 0, segments: [] });
+          byDate.set(r.date, { date: r.date, weights: [], reps: [], volume: 0, segments: [] });
         }
         const entry = byDate.get(r.date);
-        entry.maxWeight = Math.max(entry.maxWeight, r.weight);
-        entry.totalReps += r.reps * r.sets;
-        entry.totalSets += r.sets;
+        for (let i = 0; i < r.sets; i++) {
+          entry.weights.push(r.weight);
+          entry.reps.push(r.reps);
+        }
         entry.volume += r.weight * r.reps * r.sets;
         entry.segments.push(setLabel(r));
       });
-    return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+    return Array.from(byDate.values())
+      .map((e) => ({
+        date: e.date,
+        weightStats: computeBoxStats(e.weights),
+        repsStats: computeBoxStats(e.reps),
+        volume: e.volume,
+        segments: e.segments,
+        totalSets: e.weights.length,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 
   function renderChart() {
     const exercise = chartExercise.value;
-    const metricKey = chartMetric.value || "volume";
-    const metric = METRIC_CONFIG[metricKey] || METRIC_CONFIG.volume;
     const points = computeChartData(exercise);
     currentChartPoints = points;
 
     if (!points.length) {
-      chartSvg.style.display = "none";
+      chartPanels.style.display = "none";
       chartEmpty.style.display = "block";
-      chartSvg.innerHTML = "";
       return;
     }
 
     chartEmpty.style.display = "none";
-    chartSvg.style.display = "block";
+    chartPanels.style.display = "flex";
 
-    const width = 640;
-    const height = 260;
-    const margin = { top: 16, right: 16, bottom: 32, left: 48 };
-    const plotW = width - margin.left - margin.right;
-    const plotH = height - margin.top - margin.bottom;
+    renderBoxPanel(chartWeightSvg, points, (p) => p.weightStats, 100, false);
+    renderBoxPanel(chartRepsSvg, points, (p) => p.repsStats, 100, false);
+    renderVolumePanel(chartVolumeSvg, points, 130);
+  }
 
-    const values = points.map((p) => metric.getValue(p));
-    let minV = Math.min(...values);
-    let maxV = Math.max(...values);
+  function xForPanel(i, count, plotW) {
+    return count === 1 ? plotW / 2 : (i / (count - 1)) * plotW;
+  }
+
+  function renderDateLabels(points, xFor, plotH) {
+    const labelStep = Math.max(1, Math.ceil(points.length / 6));
+    let dateLabels = "";
+    points.forEach((p, i) => {
+      if (i % labelStep === 0 || i === points.length - 1) {
+        dateLabels += `<text class="chart-axis-label" x="${xFor(i)}" y="${plotH + 16}" text-anchor="middle">${formatShortDate(p.date)}</text>`;
+      }
+    });
+    return dateLabels;
+  }
+
+  function attachMarkTooltips(svgEl) {
+    svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
+      mark.addEventListener("mouseenter", showTooltip);
+      mark.addEventListener("mousemove", showTooltip);
+      mark.addEventListener("mouseleave", hideTooltip);
+      mark.addEventListener("touchstart", showTooltip, { passive: true });
+    });
+  }
+
+  // 重量・回数を「最小〜最大・中央値」の箱ヒゲ図で表示するパネル
+  function renderBoxPanel(svgEl, points, getStats, height, showDateLabels) {
+    const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
+    const plotH = height - CHART_MARGIN.top - (showDateLabels ? 20 : 4);
+
+    const allValues = points.flatMap((p) => {
+      const s = getStats(p);
+      return [s.min, s.max];
+    });
+    let minV = Math.min(...allValues);
+    let maxV = Math.max(...allValues);
     if (minV === maxV) {
       minV -= 1;
       maxV += 1;
     }
-    const pad = (maxV - minV) * 0.15;
+    const pad = (maxV - minV) * 0.2;
     minV -= pad;
     maxV += pad;
 
-    const xFor = (i) => (points.length === 1 ? plotW / 2 : (i / (points.length - 1)) * plotW);
+    const xFor = (i) => xForPanel(i, points.length, plotW);
     const yFor = (v) => plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-    const gridCount = 4;
+    const gridCount = 3;
     let gridlines = "";
     let axisLabels = "";
     for (let i = 0; i <= gridCount; i++) {
@@ -631,65 +651,117 @@
       axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
     }
 
-    const pathD = points
-      .map((p, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(metric.getValue(p)).toFixed(1)}`)
-      .join(" ");
-
-    const labelStep = Math.max(1, Math.ceil(points.length / 6));
-    let dateLabels = "";
-    points.forEach((p, i) => {
-      if (i % labelStep === 0 || i === points.length - 1) {
-        dateLabels += `<text class="chart-axis-label" x="${xFor(i)}" y="${plotH + 20}" text-anchor="middle">${formatShortDate(p.date)}</text>`;
-      }
-    });
-
-    const circles = points
-      .map(
-        (p, i) => `<circle class="chart-point" cx="${xFor(i).toFixed(1)}" cy="${yFor(metric.getValue(p)).toFixed(1)}" r="4"
-          data-index="${i}"></circle>`
-      )
+    const boxWidth = Math.min(16, (plotW / points.length) * 0.5);
+    const marks = points
+      .map((p, i) => {
+        const s = getStats(p);
+        const x = xFor(i);
+        const yMin = yFor(s.min);
+        const yMax = yFor(s.max);
+        const yQ1 = yFor(s.q1);
+        const yQ3 = yFor(s.q3);
+        const yMed = yFor(s.median);
+        const boxTop = Math.min(yQ1, yQ3);
+        const boxHeight = Math.max(Math.abs(yQ3 - yQ1), 1.5);
+        return `
+          <g class="chart-mark" data-index="${i}">
+            <line class="box-whisker" x1="${x}" y1="${yMin}" x2="${x}" y2="${yMax}"></line>
+            <rect class="box-rect" x="${(x - boxWidth / 2).toFixed(1)}" y="${boxTop.toFixed(1)}" width="${boxWidth}" height="${boxHeight.toFixed(1)}"></rect>
+            <line class="box-median" x1="${(x - boxWidth / 2).toFixed(1)}" y1="${yMed.toFixed(1)}" x2="${(x + boxWidth / 2).toFixed(1)}" y2="${yMed.toFixed(1)}"></line>
+            <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
+          </g>
+        `;
+      })
       .join("");
 
-    chartSvg.innerHTML = `
-      <g transform="translate(${margin.left},${margin.top})">
+    const dateLabels = showDateLabels ? renderDateLabels(points, xFor, plotH) : "";
+
+    svgEl.innerHTML = `
+      <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
         ${gridlines}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
         ${axisLabels}
+        ${marks}
         ${dateLabels}
-        <path class="chart-line" d="${pathD}"></path>
-        ${circles}
       </g>
     `;
+    attachMarkTooltips(svgEl);
+  }
 
-    chartSvg.querySelectorAll(".chart-point").forEach((circle) => {
-      circle.addEventListener("mouseenter", showTooltip);
-      circle.addEventListener("mousemove", showTooltip);
-      circle.addEventListener("mouseleave", hideTooltip);
-      circle.addEventListener("touchstart", showTooltip, { passive: true });
-    });
+  // ボリューム(重量×回数×セット)を棒グラフで表示するパネル。3パネルとも同じ
+  // x位置(=同じ日付)を共有しているので、縦に見比べれば実質「同じグラフ」として読める。
+  function renderVolumePanel(svgEl, points, height) {
+    const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
+    const plotH = height - CHART_MARGIN.top - 20;
+
+    let maxV = Math.max(...points.map((p) => p.volume), 1) * 1.15;
+
+    const xFor = (i) => xForPanel(i, points.length, plotW);
+    const yFor = (v) => plotH - (v / maxV) * plotH;
+    const barWidth = Math.min(22, (plotW / points.length) * 0.55);
+
+    const gridCount = 3;
+    let gridlines = "";
+    let axisLabels = "";
+    for (let i = 0; i <= gridCount; i++) {
+      const v = (maxV * i) / gridCount;
+      const y = yFor(v);
+      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
+      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
+    }
+
+    const bars = points
+      .map((p, i) => {
+        const x = xFor(i);
+        const y = yFor(p.volume);
+        return `
+          <g class="chart-mark" data-index="${i}">
+            <rect class="volume-bar" x="${(x - barWidth / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth}" height="${(plotH - y).toFixed(1)}"></rect>
+            <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
+          </g>
+        `;
+      })
+      .join("");
+
+    const dateLabels = renderDateLabels(points, xFor, plotH);
+
+    svgEl.innerHTML = `
+      <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
+        ${gridlines}
+        <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
+        ${axisLabels}
+        ${bars}
+        ${dateLabels}
+      </g>
+    `;
+    attachMarkTooltips(svgEl);
   }
 
   function showTooltip(e) {
-    const circle = e.target;
-    const index = parseInt(circle.getAttribute("data-index"), 10);
+    const mark = e.currentTarget;
+    const index = parseInt(mark.getAttribute("data-index"), 10);
     const p = currentChartPoints[index];
     if (!p) return;
 
-    const svgRect = chartSvg.getBoundingClientRect();
-    const cx = parseFloat(circle.getAttribute("cx"));
-    const cy = parseFloat(circle.getAttribute("cy"));
-    const margin = { left: 48, top: 16 };
-    const scaleX = svgRect.width / 640;
-    const scaleY = svgRect.height / 260;
+    const svg = mark.closest("svg");
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = chartContainer.getBoundingClientRect();
+    const hit = mark.querySelector(".chart-hit");
+    const x = parseFloat(hit.getAttribute("x")) + 16;
+    const scaleX = svgRect.width / CHART_WIDTH;
+
+    const left = svgRect.left - containerRect.left + (x + CHART_MARGIN.left) * scaleX;
+    const top = svgRect.top - containerRect.top + 6;
 
     chartTooltip.innerHTML = `
       <div class="tooltip-date">${formatDate(p.date)}</div>
-      <div class="tooltip-row">ボリューム: ${Math.round(p.volume)}kg</div>
-      <div class="tooltip-row">最大重量: ${p.maxWeight}kg／総回数: ${p.totalReps}回／総セット: ${p.totalSets}</div>
+      <div class="tooltip-row">重量: ${p.weightStats.min}〜${p.weightStats.max}kg（中央値 ${p.weightStats.median}）</div>
+      <div class="tooltip-row">回数: ${p.repsStats.min}〜${p.repsStats.max}回（中央値 ${p.repsStats.median}）</div>
+      <div class="tooltip-row">ボリューム: ${Math.round(p.volume)}kg／${p.totalSets}セット</div>
       <div class="tooltip-detail">${escapeHtml(p.segments.join(", "))}</div>
     `;
-    chartTooltip.style.left = `${(cx + margin.left) * scaleX}px`;
-    chartTooltip.style.top = `${(cy + margin.top) * scaleY}px`;
+    chartTooltip.style.left = `${left}px`;
+    chartTooltip.style.top = `${top}px`;
     chartTooltip.hidden = false;
   }
 
