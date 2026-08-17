@@ -591,12 +591,11 @@
     return dateLabels;
   }
 
-  // 各日のクラスタの中で、回数が多いセットほど右に配置(横位置=回数)。
-  // 点の大きさは重量を表す。同じ日に行った1セットずつがそのまま点になる。
+  // 回数を縦位置(日をまたいだ推移が見えるように)、重量を点の大きさで表す。
+  // 同じ日の複数セットは横に少しずらして並べるので、1セットずつが点として見える。
   function renderWeightRepsPanel(svgEl, points, height) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
-    const centerY = plotH / 2;
 
     const allWeights = points.flatMap((p) => p.sets.map((s) => s.weight));
     let minW = Math.min(...allWeights);
@@ -608,28 +607,44 @@
     };
 
     const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
-    const minReps = Math.min(...allReps);
-    const maxReps = Math.max(...allReps);
-    const repsSpan = maxReps - minReps || 1;
+    let minReps = Math.min(...allReps);
+    let maxReps = Math.max(...allReps);
+    if (minReps === maxReps) {
+      minReps -= 1;
+      maxReps += 1;
+    }
+    const pad = (maxReps - minReps) * 0.2;
+    minReps -= pad;
+    maxReps += pad;
 
     const xFor = (i) => xForPanel(i, points.length, plotW);
-    const clusterHalfWidth = Math.min(11, (plotW / Math.max(points.length - 1, 1)) * 0.4);
+    const yFor = (reps) => plotH - ((reps - minReps) / (maxReps - minReps)) * plotH;
+    const jitterSpacing = Math.min(7, (plotW / Math.max(points.length - 1, 1)) * 0.35);
+
+    const gridCount = 3;
+    let gridlines = "";
+    let axisLabels = "";
+    for (let i = 0; i <= gridCount; i++) {
+      const v = minReps + ((maxReps - minReps) * i) / gridCount;
+      const y = yFor(v);
+      gridlines += `<line class="chart-gridline" x1="0" y1="${y}" x2="${plotW}" y2="${y}"></line>`;
+      axisLabels += `<text class="chart-axis-label" x="-8" y="${y + 3}" text-anchor="end">${Math.round(v)}</text>`;
+    }
 
     let dots = "";
     points.forEach((p, dateIndex) => {
       const baseX = xFor(dateIndex);
       const n = p.sets.length;
       p.sets.forEach((s, setIndex) => {
-        const t = (s.reps - minReps) / repsSpan;
-        const repsOffset = (t - 0.5) * 2 * clusterHalfWidth;
-        const tieNudge = n > 1 ? (setIndex - (n - 1) / 2) * 1.2 : 0;
-        const x = baseX + repsOffset + tieNudge;
+        const offset = n > 1 ? (setIndex - (n - 1) / 2) * jitterSpacing : 0;
+        const x = baseX + offset;
+        const y = yFor(s.reps);
         const r = rFor(s.weight);
         const hitSize = Math.min(20, Math.max(14, r * 2 + 6));
         dots += `
           <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
-            <circle class="scatter-dot" cx="${x.toFixed(1)}" cy="${centerY.toFixed(1)}" r="${r.toFixed(1)}"></circle>
-            <rect class="chart-hit" x="${(x - hitSize / 2).toFixed(1)}" y="${(centerY - hitSize / 2).toFixed(1)}" width="${hitSize}" height="${hitSize}"></rect>
+            <circle class="scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
+            <rect class="chart-hit" x="${(x - hitSize / 2).toFixed(1)}" y="${(y - hitSize / 2).toFixed(1)}" width="${hitSize}" height="${hitSize}"></rect>
           </g>
         `;
       });
@@ -639,7 +654,9 @@
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
+        ${gridlines}
         <line class="chart-baseline" x1="0" y1="${plotH}" x2="${plotW}" y2="${plotH}"></line>
+        ${axisLabels}
         ${dots}
         ${dateLabels}
       </g>
