@@ -76,6 +76,21 @@ window.MuscleSync = (function () {
     return respBody.content.sha;
   }
 
+  const CARDIO_PATTERN = /バイク|ジャンプ|ラン|エアロ|有酸素/;
+
+  function isCardioExercise(name) {
+    return CARDIO_PATTERN.test(name);
+  }
+
+  // 種目名の並び順: 有酸素系(バイク・ジャンプなど)は種類が違うので、
+  // 五十音順ではなく常に一覧の最後にまとめる。それ以外は五十音順。
+  function compareExerciseNames(a, b) {
+    const aCardio = isCardioExercise(a);
+    const bCardio = isCardioExercise(b);
+    if (aCardio !== bCardio) return aCardio ? 1 : -1;
+    return a.localeCompare(b, "ja");
+  }
+
   return {
     GITHUB_OWNER,
     GITHUB_REPO,
@@ -85,5 +100,7 @@ window.MuscleSync = (function () {
     nowTime,
     getFile,
     putFile,
+    isCardioExercise,
+    compareExerciseNames,
   };
 })();

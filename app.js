@@ -16,7 +16,7 @@
   /** @type {{id:string,date:string,exercise:string,weight:number,reps:number,sets:number,memo:string}[]} */
   let records = loadRecords();
   /** @type {string[]} */
-  let exercises = loadExercises();
+  let exercises = loadExercises().sort(MuscleSync.compareExerciseNames);
   let currentChartPoints = [];
   let recordsSha = null;
   let exercisesSha = null;
@@ -133,7 +133,7 @@
       pushToGithub({ type: "add-many", records: parsed });
 
       if (newNames.length) {
-        exercises = exercises.concat(newNames);
+        exercises = exercises.concat(newNames).sort(MuscleSync.compareExerciseNames);
         saveExercises();
         pushExercisesToGithub({ type: "add-many", names: newNames });
       }
@@ -211,7 +211,7 @@
           }
         });
 
-        const isCardio = /バイク|ジャンプ|ラン|エアロ|有酸素/.test(exercise);
+        const isCardio = MuscleSync.isCardioExercise(exercise);
         let idx = 0;
         while (idx < sets.length) {
           let end = idx + 1;
@@ -350,7 +350,7 @@
         const sha = await MuscleSync.putFile(token, EXERCISES_PATH, exercises, null, "Initial exercise list sync");
         exercisesSha = sha;
       } else {
-        exercises = result.data;
+        exercises = result.data.slice().sort(MuscleSync.compareExerciseNames);
         exercisesSha = result.sha;
         saveExercises();
         renderAll();
@@ -386,7 +386,7 @@
       if (err.conflict) {
         try {
           const result = await MuscleSync.getFile(token, EXERCISES_PATH);
-          exercises = applyPendingExerciseChange(result.data, pendingChange);
+          exercises = applyPendingExerciseChange(result.data, pendingChange).sort(MuscleSync.compareExerciseNames);
           saveExercises();
           renderAll();
           const sha2 = await MuscleSync.putFile(token, EXERCISES_PATH, exercises, result.sha, "Update exercise list (merged)");
@@ -410,13 +410,13 @@
   // 記録画面の追加フォーム用: 種目管理ページで登録されている種目のみ
   // (ここから削除すると、過去の記録は残ったまま今後の入力では選べなくなる)
   function getRegisteredExerciseNames() {
-    return exercises.slice().sort((a, b) => a.localeCompare(b, "ja"));
+    return exercises.slice().sort(MuscleSync.compareExerciseNames);
   }
 
   // 概要・絞り込み・グラフ用: 実際に記録がある種目のみ
   function getUsedExerciseNames() {
     const set = new Set(records.map((r) => r.exercise));
-    return Array.from(set).sort((a, b) => a.localeCompare(b, "ja"));
+    return Array.from(set).sort(MuscleSync.compareExerciseNames);
   }
 
   function renderAll(opts) {
