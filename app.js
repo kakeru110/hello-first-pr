@@ -35,6 +35,37 @@
   const SELECT_GROUP_ORDER = ["chest", "back", "shoulder", "arm", "leg", "other", "cardio"];
   const SELECT_GROUP_LABELS = { chest: "胸", back: "背中", shoulder: "肩", arm: "腕", leg: "脚", other: "その他", cardio: "有酸素" };
 
+  // 「スミス〜」種目を、同じグループ内にある素の種目(例: ベンチプレス)の
+  // 直後に並べ替える(マシン違いだけの種目を選ぶときに隣で見比べられるように)。
+  // 対応する素の種目が無い「スミス」種目(例: スミスサポーテッドロー)はそのまま。
+  function smithBaseNameOf(name) {
+    return name.startsWith("スミス") && name.length > 3 ? name.slice(3) : null;
+  }
+
+  function reorderSmithPairs(names) {
+    const pairedBaseOf = new Map();
+    names.forEach((n) => {
+      const base = smithBaseNameOf(n);
+      if (!base) return;
+      const match = names.find((other) => other !== n && !smithBaseNameOf(other) && (other.includes(base) || base.includes(other)));
+      if (match) pairedBaseOf.set(n, match);
+    });
+
+    const consumed = new Set();
+    const result = [];
+    names.forEach((n) => {
+      if (consumed.has(n) || pairedBaseOf.has(n)) return;
+      result.push(n);
+      names.forEach((maybeSmith) => {
+        if (pairedBaseOf.get(maybeSmith) === n && !consumed.has(maybeSmith)) {
+          result.push(maybeSmith);
+          consumed.add(maybeSmith);
+        }
+      });
+    });
+    return result;
+  }
+
   function groupExerciseNamesForSelect(names) {
     const buckets = new Map();
     names.forEach((n) => {
@@ -43,7 +74,7 @@
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key).push(n);
     });
-    return SELECT_GROUP_ORDER.filter((k) => buckets.has(k)).map((k) => ({ label: SELECT_GROUP_LABELS[k], names: buckets.get(k) }));
+    return SELECT_GROUP_ORDER.filter((k) => buckets.has(k)).map((k) => ({ label: SELECT_GROUP_LABELS[k], names: reorderSmithPairs(buckets.get(k)) }));
   }
 
   function renderGroupedOptionsHtml(names) {
