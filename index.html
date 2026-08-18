@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ記録</title>
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <header class="app-header">
@@ -96,13 +96,24 @@
         <label for="chart-exercise">種目</label>
         <select id="chart-exercise"></select>
       </div>
+      <div class="chart-control-item">
+        <label for="chart-range">期間</label>
+        <select id="chart-range">
+          <option value="28" selected>直近4週間</option>
+          <option value="56">直近8週間</option>
+          <option value="90">直近3ヶ月</option>
+          <option value="180">直近6ヶ月</option>
+          <option value="all">全期間</option>
+        </select>
+      </div>
     </div>
+    <div id="chart-detail" class="chart-detail">グラフの点をタップすると詳細が表示されます</div>
     <div id="chart-container">
       <p id="chart-empty" class="empty-message">記録がまだありません</p>
-      <p class="chart-panel-hint">縦位置が回数、●の大きさが重量。同じ日の複数セットは横に少しずらして表示</p>
+      <p class="chart-panel-hint">縦位置が回数、丸の中の数字が重量(kg)。同じ日の複数セットは左から順に表示</p>
       <div id="chart-panels">
         <div class="chart-panel">
-          <p class="chart-panel-label">回数(回) ・ 重量(●の大きさ、kg)</p>
+          <p class="chart-panel-label">回数(回) ・ 重量(丸の中の数字、kg)</p>
           <svg id="chart-weight-reps" viewBox="0 0 640 130" role="img" aria-label="回数と重量"></svg>
         </div>
         <div class="chart-panel">
@@ -114,7 +125,6 @@
           <svg id="chart-volume-avg" viewBox="0 0 640 130" role="img" aria-label="ボリュームの14日移動平均"></svg>
         </div>
       </div>
-      <div id="chart-tooltip" class="chart-tooltip" hidden></div>
     </div>
   </section>
 
@@ -133,7 +143,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="sync.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
