@@ -160,6 +160,7 @@ main {
 .field-row.inline input {
   padding-left: 8px;
   padding-right: 4px;
+  height: 40px;
 }
 
 label {
