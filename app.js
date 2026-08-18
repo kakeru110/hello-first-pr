@@ -47,6 +47,7 @@
   const memoInput = document.getElementById("memo");
   const filterExercise = document.getElementById("filter-exercise");
   const chartExercise = document.getElementById("chart-exercise");
+  const chartRange = document.getElementById("chart-range");
   const historyList = document.getElementById("history-list");
   const chartPanels = document.getElementById("chart-panels");
   const chartWeightRepsSvg = document.getElementById("chart-weight-reps");
@@ -54,8 +55,8 @@
   const chartVolumeAvgSvg = document.getElementById("chart-volume-avg");
   const volumeAvgCategoryLabel = document.getElementById("volume-avg-category");
   const chartEmpty = document.getElementById("chart-empty");
-  const chartContainer = document.getElementById("chart-container");
-  const chartTooltip = document.getElementById("chart-tooltip");
+  const chartDetail = document.getElementById("chart-detail");
+  const CHART_DETAIL_PLACEHOLDER = "グラフの点をタップすると詳細が表示されます";
   const importText = document.getElementById("import-text");
   const importBtn = document.getElementById("import-btn");
   const importResult = document.getElementById("import-result");
@@ -136,6 +137,7 @@
 
   filterExercise.addEventListener("change", renderHistory);
   chartExercise.addEventListener("change", renderChart);
+  chartRange.addEventListener("change", renderChart);
 
   importBtn.addEventListener("click", function () {
     const { parsed, warnings } = parseBulkLog(importText.value);
@@ -592,10 +594,26 @@
       .map((e, dateIndex) => Object.assign({ dateIndex }, e));
   }
 
+  function addDays(iso, n) {
+    const d = new Date(iso + "T00:00:00");
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // 期間セレクタの選択値をもとに、日付配列を「直近N日」に絞り込む。
+  // 基準は「今日」ではなく、その種目の最新記録日(points内の最終日)にする。
+  // そうしないと最近サボっているときに空のグラフになってしまうため。
+  function rangeCutoffDate(points) {
+    const rangeValue = chartRange.value;
+    if (rangeValue === "all" || !points.length) return null;
+    const latestDate = points[points.length - 1].date;
+    return addDays(latestDate, -(parseInt(rangeValue, 10) - 1));
+  }
+
   function renderChart() {
     const exercise = chartExercise.value;
     const points = computeChartData(exercise);
-    currentChartPoints = points;
+    chartDetail.textContent = CHART_DETAIL_PLACEHOLDER;
 
     if (!points.length) {
       chartPanels.style.display = "none";
@@ -606,13 +624,17 @@
     chartEmpty.style.display = "none";
     chartPanels.style.display = "flex";
 
+    const cutoff = rangeCutoffDate(points);
+    const visiblePoints = cutoff ? points.filter((p) => p.date >= cutoff) : points;
+    currentChartPoints = visiblePoints;
+
     const category = categoryForExercise(exercise);
     const categoryPoints = computeCategoryChartData(category);
     volumeAvgCategoryLabel.textContent = category.key.startsWith("other:") ? "" : category.label;
 
-    renderWeightRepsPanel(chartWeightRepsSvg, points, 130);
-    renderVolumePanel(chartVolumeSvg, points, 130);
-    renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130);
+    renderWeightRepsPanel(chartWeightRepsSvg, visiblePoints, 130);
+    renderVolumePanel(chartVolumeSvg, visiblePoints, 130);
+    renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130, cutoff);
   }
 
   function xForPanel(i, count, plotW) {
@@ -648,27 +670,30 @@
     return dateLabels;
   }
 
-  // 回数を縦位置(日をまたいだ推移が見えるように)、重量を点の大きさで表す。
+  // 回数を縦位置(日をまたいだ推移が見えるように)、重量は点の大きさではなく
+  // 点の中の数字でそのまま表示する(大きさの見分けづらさの指摘への対応)。
   // 同じ日の複数セットは横に少しずらして並べるので、1セットずつが点として見える。
   function renderWeightRepsPanel(svgEl, points, height) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
-    const allWeights = points.flatMap((p) => p.sets.map((s) => s.weight));
-    let minW = Math.min(...allWeights);
-    let maxW = Math.max(...allWeights);
-    const rFor = (weight) => {
-      if (maxW === minW) return 7;
-      const t = (weight - minW) / (maxW - minW);
-      return 3 + Math.sqrt(t) * 7;
-    };
+    const plainR = 4; // 重量のない(有酸素の回数のみなど)セット用の小さい点
+    const gap = 2;
+    // 円の大きさは重量の意味付けではなく、中に書く数字(例: "62.5")が収まる
+    // ための最低限のサイズにすぎない(桁数が多いほど少し大きくなる)。
+    const rForWeight = (weight) => (weight > 0 ? Math.max(7, 3.5 + String(weight).length * 2.1) : plainR);
 
     const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
     const maxReps = Math.max(...allReps) * 1.15;
 
     const xFor = (i) => xForPanel(i, points.length, plotW);
     const yFor = (reps) => plotH - (reps / maxReps) * plotH;
-    const jitterSpacing = Math.min(7, (plotW / Math.max(points.length - 1, 1)) * 0.35);
+    // 隣の日付の列にはみ出さないよう、1日分のクラスタ幅の上限を列間隔の92%に抑える。
+    // 数字入りの円をぴったり並べてもその幅に収まらない日は、その日だけ数字なしの
+    // 小さい点に切り替える(無理に詰めて数字が読めなくなるより、タップで詳細を
+    // 見てもらう方が確実なため)。
+    const columnSpacing = points.length > 1 ? plotW / (points.length - 1) : plotW;
+    const maxClusterWidth = columnSpacing * 0.92;
 
     const axis = renderValueAxis(plotW, 0, maxReps, 3, yFor, "回");
 
@@ -676,17 +701,40 @@
     points.forEach((p, dateIndex) => {
       const baseX = xFor(dateIndex);
       const n = p.sets.length;
+
+      let useChip = true;
+      let radii = p.sets.map((s) => rForWeight(s.weight));
+      let totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
+      if (totalWidth > maxClusterWidth) {
+        useChip = false;
+        radii = p.sets.map(() => plainR);
+        totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
+      }
+      // それでも収まらない極端な密集日は、点そのものを縮めて必ず日付間の枠内に収める
+      // (タップ領域は別途 hitSize で最低24pxを確保しているので、押しにくくはならない)。
+      let clusterGap = gap;
+      if (totalWidth > maxClusterWidth && totalWidth > 0) {
+        const scale = maxClusterWidth / totalWidth;
+        radii = radii.map((r) => r * scale);
+        clusterGap = gap * scale;
+        totalWidth = maxClusterWidth;
+      }
+
+      let cursor = baseX - totalWidth / 2;
       p.sets.forEach((s, setIndex) => {
-        const offset = n > 1 ? (setIndex - (n - 1) / 2) * jitterSpacing : 0;
-        const x = baseX + offset;
+        const r = radii[setIndex];
+        const x = cursor + r;
+        cursor += r * 2 + clusterGap;
         const y = yFor(s.reps);
-        const r = rFor(s.weight);
-        const hitSize = Math.min(20, Math.max(14, r * 2 + 6));
-        const labelY = Math.max(7, y - r - 3);
+        const hasWeight = s.weight > 0 && useChip;
+        const hitSize = Math.max(24, r * 2 + 4);
+        const label = hasWeight
+          ? `<text class="scatter-dot-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${s.weight}</text>`
+          : "";
         dots += `
           <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
             <circle class="scatter-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
-            <text class="scatter-dot-label" x="${x.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle">${setIndex + 1}</text>
+            ${label}
             <rect class="chart-hit" x="${(x - hitSize / 2).toFixed(1)}" y="${(y - hitSize / 2).toFixed(1)}" width="${hitSize}" height="${hitSize}"></rect>
           </g>
         `;
@@ -707,7 +755,6 @@
     svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
       mark.addEventListener("mouseenter", showSetTooltip);
       mark.addEventListener("mousemove", showSetTooltip);
-      mark.addEventListener("mouseleave", hideTooltip);
       mark.addEventListener("touchstart", showSetTooltip, { passive: true });
     });
   }
@@ -756,7 +803,6 @@
     svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
       mark.addEventListener("mouseenter", showVolumeTooltip);
       mark.addEventListener("mousemove", showVolumeTooltip);
-      mark.addEventListener("mouseleave", hideTooltip);
       mark.addEventListener("touchstart", showVolumeTooltip, { passive: true });
     });
   }
@@ -780,11 +826,14 @@
 
   // ボリュームの14日移動平均を折れ線で表示するパネル。上の日次ボリューム棒グラフと
   // 同じx位置(=同じ日付)を共有しているので、縦に見比べれば実質「同じグラフ」として読める。
-  function renderVolumeAvgPanel(svgEl, points, height) {
+  // 移動平均自体は部位の全履歴(points)から計算してから期間で絞り込む。そうしないと
+  // 表示範囲の先頭付近の平均が「直近14日分」に満たない不正確な値になってしまうため。
+  function renderVolumeAvgPanel(svgEl, points, height, cutoff) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
-    const avgPoints = computeRollingVolumeAvg(points, 14);
+    const fullAvgPoints = computeRollingVolumeAvg(points, 14);
+    const avgPoints = cutoff ? fullAvgPoints.filter((p) => p.date >= cutoff) : fullAvgPoints;
 
     let minV = Math.min(...avgPoints.map((p) => p.avg));
     let maxV = Math.max(...avgPoints.map((p) => p.avg));
@@ -796,7 +845,7 @@
     minV -= pad;
     maxV += pad;
 
-    const xFor = (i) => xForPanel(i, points.length, plotW);
+    const xFor = (i) => xForPanel(i, avgPoints.length, plotW);
     const yFor = (v) => plotH - ((v - minV) / (maxV - minV)) * plotH;
 
     const axis = renderValueAxis(plotW, minV, maxV, 3, yFor, "kg");
@@ -818,7 +867,7 @@
       })
       .join("");
 
-    const dateLabels = renderDateLabels(points, xFor, plotH);
+    const dateLabels = renderDateLabels(avgPoints, xFor, plotH);
 
     svgEl.innerHTML = `
       <g transform="translate(${CHART_MARGIN.left},${CHART_MARGIN.top})">
@@ -833,26 +882,15 @@
     svgEl.querySelectorAll(".chart-mark").forEach((mark) => {
       mark.addEventListener("mouseenter", showAvgTooltip);
       mark.addEventListener("mousemove", showAvgTooltip);
-      mark.addEventListener("mouseleave", hideTooltip);
       mark.addEventListener("touchstart", showAvgTooltip, { passive: true });
     });
 
     svgEl.__avgPoints = avgPoints;
   }
 
-  function positionTooltip(mark) {
-    const svg = mark.closest("svg");
-    const svgRect = svg.getBoundingClientRect();
-    const containerRect = chartContainer.getBoundingClientRect();
-    const hit = mark.querySelector(".chart-hit");
-    const hitWidth = parseFloat(hit.getAttribute("width"));
-    const x = parseFloat(hit.getAttribute("x")) + hitWidth / 2;
-    const scaleX = svgRect.width / CHART_WIDTH;
-
-    chartTooltip.style.left = `${svgRect.left - containerRect.left + (x + CHART_MARGIN.left) * scaleX}px`;
-    chartTooltip.style.top = `${svgRect.top - containerRect.top + 6}px`;
-  }
-
+  // タップ/ホバーした点の詳細は、グラフに重ねるポップアップではなく
+  // グラフの上に常設した detail 欄に表示する(ポップアップがグラフを覆って
+  // 邪魔になるという指摘への対応)。表示位置の計算が不要になる分シンプルにもなる。
   function showSetTooltip(e) {
     const mark = e.currentTarget;
     const dateIndex = parseInt(mark.getAttribute("data-date-index"), 10);
@@ -861,13 +899,11 @@
     const s = p && p.sets[setIndex];
     if (!s) return;
 
-    positionTooltip(mark);
-    chartTooltip.innerHTML = `
+    chartDetail.innerHTML = `
       <div class="tooltip-date">${formatDate(p.date)}</div>
       <div class="tooltip-row">${s.weight}kg × ${s.reps}回（${setIndex + 1}/${p.totalSets}セット目）</div>
       <div class="tooltip-detail">この日: ${escapeHtml(p.segments.join(", "))}</div>
     `;
-    chartTooltip.hidden = false;
   }
 
   function showVolumeTooltip(e) {
@@ -876,13 +912,11 @@
     const p = currentChartPoints[dateIndex];
     if (!p) return;
 
-    positionTooltip(mark);
-    chartTooltip.innerHTML = `
+    chartDetail.innerHTML = `
       <div class="tooltip-date">${formatDate(p.date)}</div>
       <div class="tooltip-row">ボリューム: ${Math.round(p.volume)}kg／${p.totalSets}セット</div>
       <div class="tooltip-detail">${escapeHtml(p.segments.join(", "))}</div>
     `;
-    chartTooltip.hidden = false;
   }
 
   function showAvgTooltip(e) {
@@ -893,17 +927,11 @@
     const p = avgPoints[dateIndex];
     if (!p) return;
 
-    positionTooltip(mark);
-    chartTooltip.innerHTML = `
+    chartDetail.innerHTML = `
       <div class="tooltip-date">${formatDate(p.date)}</div>
       <div class="tooltip-row">14日移動平均: ${Math.round(p.avg)}kg</div>
       <div class="tooltip-detail">直近${p.windowCount}回の記録の平均</div>
     `;
-    chartTooltip.hidden = false;
-  }
-
-  function hideTooltip() {
-    chartTooltip.hidden = true;
   }
 
   function formatDate(iso) {
