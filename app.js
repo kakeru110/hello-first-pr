@@ -706,9 +706,11 @@
 
     const plainR = 4; // 重量のない(有酸素の回数のみなど)セット用の小さい点
     const gap = 2;
-    // 円の大きさは重量の意味付けではなく、中に書く数字(例: "62.5")が収まる
-    // ための最低限のサイズにすぎない(桁数が多いほど少し大きくなる)。
-    const rForWeight = (weight) => (weight > 0 ? Math.max(7, 3.5 + String(weight).length * 2.1) : plainR);
+    // 円の中の数字は四捨五入して表示する(実際の重量はタップした詳細欄で確認できる)。
+    // 62.5 のような小数第一位の値だけ桁数が増えて円だけ目立って大きくなるのを防ぐため。
+    const displayWeight = (weight) => Math.round(weight);
+    // 円の大きさは重量の意味付けではなく、中に書く数字が収まるための最低限のサイズ。
+    const rForWeight = (weight) => (weight > 0 ? Math.max(7, 3.5 + String(displayWeight(weight)).length * 2.1) : plainR);
 
     const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
     const maxReps = Math.max(...allReps) * 1.15;
@@ -756,7 +758,7 @@
         const hasWeight = s.weight > 0 && useChip;
         const hitSize = Math.max(24, r * 2 + 4);
         const label = hasWeight
-          ? `<text class="scatter-dot-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${s.weight}</text>`
+          ? `<text class="scatter-dot-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${displayWeight(s.weight)}</text>`
           : "";
         dots += `
           <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
