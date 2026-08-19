@@ -718,8 +718,12 @@
     renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130, cutoff);
   }
 
+  // データ点をプロット幅いっぱい(0〜plotW)に配置すると、点数が少ない時に
+  // 両端ぎりぎりに張り付いて不自然に見えるため、左右に少し余白を入れる。
   function xForPanel(i, count, plotW) {
-    return count === 1 ? plotW / 2 : (i / (count - 1)) * plotW;
+    if (count === 1) return plotW / 2;
+    const pad = Math.min(40, plotW * 0.08);
+    return pad + (i / (count - 1)) * (plotW - pad * 2);
   }
 
   // 縦軸の目盛り線とラベルをまとめて作る。単位(unit)を付け、四捨五入した結果が
