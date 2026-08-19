@@ -2291,7 +2291,25 @@
     "exercise": "スミスサポーテッドロー",
     "weight": 35,
     "reps": 8,
-    "sets": 3,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "3bdbc7bd-c68d-433f-913e-6a9f2d19763f",
+    "date": "2026-08-19",
+    "exercise": "スミスサポーテッドロー",
+    "weight": 35,
+    "reps": 8,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "b5c785db-0855-4641-b878-d22abdf54ab2",
+    "date": "2026-08-19",
+    "exercise": "スミスサポーテッドロー",
+    "weight": 35,
+    "reps": 8,
+    "sets": 1,
     "memo": ""
   },
   {
@@ -2300,7 +2318,25 @@
     "exercise": "アームカール",
     "weight": 10,
     "reps": 10,
-    "sets": 3,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "6761a694-2822-473c-b679-552bfcd112be",
+    "date": "2026-08-19",
+    "exercise": "アームカール",
+    "weight": 10,
+    "reps": 10,
+    "sets": 1,
+    "memo": ""
+  },
+  {
+    "id": "e3da01e0-2b6c-40a2-a0d1-1c791c7672a3",
+    "date": "2026-08-19",
+    "exercise": "アームカール",
+    "weight": 10,
+    "reps": 10,
+    "sets": 1,
     "memo": ""
   }
 ]
