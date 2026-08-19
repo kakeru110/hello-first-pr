@@ -163,6 +163,14 @@ main {
   height: 40px;
 }
 
+/* iOS Safariはtype="date"に大きめの内部レイアウトを強制してくるため、
+   appearanceをリセットしてheight/paddingが効くようにする */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 0.95rem;
+}
+
 label {
   font-size: 0.85rem;
   color: var(--text-secondary);
