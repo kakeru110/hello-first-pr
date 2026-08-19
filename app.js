@@ -157,47 +157,27 @@
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    const date = dateInput.value;
-    const exercise = exerciseInput.value;
-    const weight = parseFloat(weightInput.value);
-    const reps = parseInt(repsInput.value, 10);
-    const memo = memoInput.value.trim();
-    if (!date || !exercise || isNaN(weight) || isNaN(reps)) {
+    const record = {
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+      date: dateInput.value,
+      exercise: exerciseInput.value,
+      weight: parseFloat(weightInput.value),
+      reps: parseInt(repsInput.value, 10),
+      sets: 1,
+      memo: memoInput.value.trim(),
+    };
+    if (!record.date || !record.exercise || isNaN(record.weight) || isNaN(record.reps)) {
       return;
     }
-
-    // 同じ日・同じ種目・同じ重量×回数の記録がすでにあれば、新しい行を増やすのではなく
-    // そのセット数を+1する。1セットずつ「追加する」を続けて押すと同じ内容の記録が
-    // バラバラに並んでしまっていたのを防ぐため(メモが付いている記録は対象外)。
-    const existing = memo
-      ? undefined
-      : records.find((r) => r.date === date && r.exercise === exercise && r.weight === weight && r.reps === reps && !r.memo);
-
-    let pendingChange;
-    if (existing) {
-      existing.sets += 1;
-      pendingChange = { type: "increment-sets", id: existing.id };
-    } else {
-      const record = {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-        date,
-        exercise,
-        weight,
-        reps,
-        sets: 1,
-        memo,
-      };
-      records.push(record);
-      pendingChange = { type: "add", record };
-    }
+    records.push(record);
     saveRecords();
-    pushToGithub(pendingChange);
+    pushToGithub({ type: "add", record });
 
-    const keepExercise = exercise;
+    const keepExercise = record.exercise;
     form.reset();
-    dateInput.value = date;
+    dateInput.value = record.date;
 
-    renderAll({ selectExerciseForChart: exercise, keepFormExercise: keepExercise });
+    renderAll({ selectExerciseForChart: record.exercise, keepFormExercise: keepExercise });
   });
 
   function handleDayCardDeleteClick(e) {
@@ -414,9 +394,6 @@
     }
     if (pendingChange.type === "delete") {
       return baseRecords.filter((r) => r.id !== pendingChange.id);
-    }
-    if (pendingChange.type === "increment-sets") {
-      return baseRecords.map((r) => (r.id === pendingChange.id ? Object.assign({}, r, { sets: r.sets + 1 }) : r));
     }
     return baseRecords.slice();
   }
