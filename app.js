@@ -108,6 +108,8 @@
   const chartExercise = document.getElementById("chart-exercise");
   const chartRange = document.getElementById("chart-range");
   const historyList = document.getElementById("history-list");
+  const todaySection = document.getElementById("today-section");
+  const todayList = document.getElementById("today-list");
   const chartPanels = document.getElementById("chart-panels");
   const chartWeightRepsSvg = document.getElementById("chart-weight-reps");
   const chartVolumeSvg = document.getElementById("chart-volume");
@@ -178,7 +180,7 @@
     renderAll({ selectExerciseForChart: record.exercise, keepFormExercise: keepExercise });
   });
 
-  historyList.addEventListener("click", function (e) {
+  function handleDayCardDeleteClick(e) {
     const target = e.target.closest(".set-chip-delete");
     if (!target) return;
     const id = target.dataset.id;
@@ -192,7 +194,10 @@
     saveRecords();
     pushToGithub({ type: "delete", id });
     renderAll();
-  });
+  }
+
+  historyList.addEventListener("click", handleDayCardDeleteClick);
+  todayList.addEventListener("click", handleDayCardDeleteClick);
 
   filterExercise.addEventListener("change", renderHistory);
   chartExercise.addEventListener("change", renderChart);
@@ -500,6 +505,7 @@
   function renderAll(opts) {
     opts = opts || {};
     renderExerciseOptions(opts);
+    renderTodaySection();
     renderHistory();
     renderChart();
   }
@@ -540,6 +546,81 @@
     return `${r.weight}kg×${r.reps}回${r.sets > 1 ? `×${r.sets}set` : ""}`;
   }
 
+  // 1日分の記録を day-card の HTML に組み立てる(本日の記録欄・記録一覧の両方で使う共通処理)。
+  function buildDayCardHtml(date, dayRecords, open) {
+    const dayVolume = dayRecords.reduce((sum, r) => sum + r.weight * r.reps * r.sets, 0);
+
+    const byExercise = new Map();
+    dayRecords.forEach((r) => {
+      if (!byExercise.has(r.exercise)) byExercise.set(r.exercise, []);
+      byExercise.get(r.exercise).push(r);
+    });
+
+    const exerciseGroups = Array.from(byExercise.entries())
+      .map(([exercise, recs]) => {
+        const chips = recs
+          .map(
+            (r) => `
+          <span class="set-chip">
+            <span class="set-chip-text">${setLabel(r)}</span>
+            <button class="set-chip-delete" data-id="${r.id}" aria-label="この記録を削除">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+            </button>
+          </span>
+        `
+          )
+          .join("");
+        const exerciseVolume = recs.reduce((sum, r) => sum + r.weight * r.reps * r.sets, 0);
+        const memoRecord = recs.find((r) => r.memo);
+
+        return `
+          <div class="exercise-group">
+            <div class="exercise-group-header">
+              <span class="exercise-group-name">${escapeHtml(exercise)}</span>
+              ${exerciseVolume > 0 ? `<span class="volume-badge">Vol ${Math.round(exerciseVolume)}</span>` : ""}
+            </div>
+            <div class="set-chip-row">${chips}</div>
+            ${memoRecord ? `<span class="record-memo">${escapeHtml(memoRecord.memo)}</span>` : ""}
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <details class="day-card"${open ? " open" : ""}>
+        <summary class="day-card-header">
+          <h3>${formatDate(date)}</h3>
+          ${dayVolume > 0 ? `<span class="volume-badge volume-badge-day">合計Vol ${Math.round(dayVolume)}</span>` : ""}
+        </summary>
+        ${exerciseGroups}
+      </details>
+    `;
+  }
+
+  function groupRecordsByDateDesc(recs) {
+    const byDate = new Map();
+    recs.forEach((r) => {
+      if (!byDate.has(r.date)) byDate.set(r.date, []);
+      byDate.get(r.date).push(r);
+    });
+    const dates = Array.from(byDate.keys()).sort((a, b) => b.localeCompare(a));
+    return { byDate, dates };
+  }
+
+  // フォーム直下の「本日の記録」欄: 一番新しい日付の記録だけをすぐ確認できるように表示する。
+  // 記録一覧(全期間)はグラフの下にあるので、ここは日々の入力確認用の軽量な表示。
+  function renderTodaySection() {
+    if (!records.length) {
+      todaySection.hidden = true;
+      todayList.innerHTML = "";
+      return;
+    }
+    const { byDate, dates } = groupRecordsByDateDesc(records);
+    const latestDate = dates[0];
+    todaySection.hidden = false;
+    todayList.innerHTML = buildDayCardHtml(latestDate, byDate.get(latestDate), true);
+  }
+
   function renderHistory() {
     const filtered = filterExercise.value
       ? records.filter((r) => r.exercise === filterExercise.value)
@@ -550,66 +631,8 @@
       return;
     }
 
-    const byDate = new Map();
-    filtered.forEach((r) => {
-      if (!byDate.has(r.date)) byDate.set(r.date, []);
-      byDate.get(r.date).push(r);
-    });
-
-    const dates = Array.from(byDate.keys()).sort((a, b) => b.localeCompare(a));
-
-    historyList.innerHTML = dates
-      .map((date, dateIndex) => {
-        const dayRecords = byDate.get(date);
-        const dayVolume = dayRecords.reduce((sum, r) => sum + r.weight * r.reps * r.sets, 0);
-
-        const byExercise = new Map();
-        dayRecords.forEach((r) => {
-          if (!byExercise.has(r.exercise)) byExercise.set(r.exercise, []);
-          byExercise.get(r.exercise).push(r);
-        });
-
-        const exerciseGroups = Array.from(byExercise.entries())
-          .map(([exercise, recs]) => {
-            const chips = recs
-              .map(
-                (r) => `
-              <span class="set-chip">
-                <span class="set-chip-text">${setLabel(r)}</span>
-                <button class="set-chip-delete" data-id="${r.id}" aria-label="この記録を削除">
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-                </button>
-              </span>
-            `
-              )
-              .join("");
-            const exerciseVolume = recs.reduce((sum, r) => sum + r.weight * r.reps * r.sets, 0);
-            const memoRecord = recs.find((r) => r.memo);
-
-            return `
-              <div class="exercise-group">
-                <div class="exercise-group-header">
-                  <span class="exercise-group-name">${escapeHtml(exercise)}</span>
-                  ${exerciseVolume > 0 ? `<span class="volume-badge">Vol ${Math.round(exerciseVolume)}</span>` : ""}
-                </div>
-                <div class="set-chip-row">${chips}</div>
-                ${memoRecord ? `<span class="record-memo">${escapeHtml(memoRecord.memo)}</span>` : ""}
-              </div>
-            `;
-          })
-          .join("");
-
-        return `
-          <details class="day-card"${dateIndex === 0 ? " open" : ""}>
-            <summary class="day-card-header">
-              <h3>${formatDate(date)}</h3>
-              ${dayVolume > 0 ? `<span class="volume-badge volume-badge-day">合計Vol ${Math.round(dayVolume)}</span>` : ""}
-            </summary>
-            ${exerciseGroups}
-          </details>
-        `;
-      })
-      .join("");
+    const { byDate, dates } = groupRecordsByDateDesc(filtered);
+    historyList.innerHTML = dates.map((date) => buildDayCardHtml(date, byDate.get(date), false)).join("");
   }
 
   // 日付ごとに、その日行った個々のセット(重量・回数の組)を配列で保持する。

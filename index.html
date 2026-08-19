@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ記録</title>
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 <header class="app-header">
@@ -68,14 +68,9 @@
     </details>
   </section>
 
-  <section class="card" aria-labelledby="history-heading">
-    <div class="history-header">
-      <h2 id="history-heading">記録一覧</h2>
-      <select id="filter-exercise">
-        <option value="">すべての種目</option>
-      </select>
-    </div>
-    <div id="history-list"></div>
+  <section class="card" id="today-section" aria-labelledby="today-heading" hidden>
+    <h2 id="today-heading">本日の記録</h2>
+    <div id="today-list"></div>
   </section>
 
   <section class="card" aria-labelledby="chart-heading">
@@ -117,6 +112,16 @@
     </div>
   </section>
 
+  <section class="card" aria-labelledby="history-heading">
+    <div class="history-header">
+      <h2 id="history-heading">記録一覧</h2>
+      <select id="filter-exercise">
+        <option value="">すべての種目</option>
+      </select>
+    </div>
+    <div id="history-list"></div>
+  </section>
+
   <section class="card" aria-labelledby="sync-heading">
     <details id="sync-details">
       <summary id="sync-heading">GitHub同期の設定</summary>
@@ -143,7 +148,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=17"></script>
-<script src="app.js?v=17"></script>
+<script src="sync.js?v=18"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>
