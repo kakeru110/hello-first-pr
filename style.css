@@ -746,7 +746,7 @@ select:disabled {
 
 .chart-axis-label {
   fill: var(--text-muted);
-  font-size: 10px;
+  font-size: 13px;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 

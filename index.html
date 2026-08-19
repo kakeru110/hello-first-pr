@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ記録</title>
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 <header class="app-header">
@@ -42,11 +42,11 @@
         </div>
         <div>
           <label for="weight">重量 (kg)</label>
-          <input type="number" id="weight" min="0" step="0.5" required>
+          <input type="number" id="weight" min="0" step="0.5" inputmode="decimal" required>
         </div>
         <div>
           <label for="reps">回数</label>
-          <input type="number" id="reps" min="1" step="1" required>
+          <input type="number" id="reps" min="1" step="1" inputmode="numeric" pattern="[0-9]*" required>
         </div>
       </div>
       <div class="field-row">
@@ -94,11 +94,11 @@
     <div id="chart-detail" class="chart-detail">グラフの点をタップすると詳細が表示されます</div>
     <div id="chart-container">
       <p id="chart-empty" class="empty-message">記録がまだありません</p>
-      <p class="chart-panel-hint">縦位置が回数、丸の中の数字が重量(kg)。同じ日の複数セットは左から順に表示</p>
+      <p class="chart-panel-hint">縦位置が重量、丸の中の数字が回数。同じ日の複数セットは左から順に表示</p>
       <div id="chart-panels">
         <div class="chart-panel">
-          <p class="chart-panel-label">回数(回) ・ 重量(丸の中の数字、kg)</p>
-          <svg id="chart-weight-reps" viewBox="0 0 640 130" role="img" aria-label="回数と重量"></svg>
+          <p class="chart-panel-label">重量(kg) ・ 回数(丸の中の数字)</p>
+          <svg id="chart-weight-reps" viewBox="0 0 640 130" role="img" aria-label="重量と回数"></svg>
         </div>
         <div class="chart-panel">
           <p class="chart-panel-label">ボリューム (重量×回数×セット)</p>
@@ -148,7 +148,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=18"></script>
-<script src="app.js?v=18"></script>
+<script src="sync.js?v=19"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>

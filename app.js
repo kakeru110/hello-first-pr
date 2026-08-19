@@ -11,7 +11,7 @@
   const SEED_EXERCISES = ["アームカール", "シーテッドロー", "ショルダープレス", "スクワット", "スミスアームカール", "スミスサポーテッドロー", "スミススクワット", "スミスベンチプレス", "スミスベントオーバーロー", "スミスミリタリー", "ダンベルベンチ", "チェストプレス", "デッドリフト", "ペクトラルフライ", "ベンチプレス", "ベントオーバーロー", "ミリタリープレス", "ラットプルダウン", "レッグプレス", "懸垂", "ジャンプ", "バイク", "ラン"];
 
   const CHART_WIDTH = 640;
-  const CHART_MARGIN = { top: 14, right: 12, left: 40 };
+  const CHART_MARGIN = { top: 14, right: 12, left: 54 };
 
   // 種目名から部位を推定する(2週間平均を部位単位でまとめて見せるため)。
   // 判定は上から優先度順、どれにも当てはまらなければ「その他」としてその種目単独で扱う。
@@ -758,19 +758,16 @@
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
-    const plainR = 4; // 重量のない(有酸素の回数のみなど)セット用の小さい点
     const gap = 2;
-    // 円の中の数字は四捨五入して表示する(実際の重量はタップした詳細欄で確認できる)。
-    // 62.5 のような小数第一位の値だけ桁数が増えて円だけ目立って大きくなるのを防ぐため。
-    const displayWeight = (weight) => Math.round(weight);
-    // 円の大きさは重量の意味付けではなく、中に書く数字が収まるための最低限のサイズ。
-    const rForWeight = (weight) => (weight > 0 ? Math.max(7, 3.5 + String(displayWeight(weight)).length * 2.1) : plainR);
+    // 円の大きさは意味づけではなく、中に書く回数の数字が収まるための最低限のサイズ。
+    // 回数は常に整数で桁数も少ないため、以前(重量表示)より円がずっと揃いやすい。
+    const rForReps = (reps) => Math.max(7, 3.5 + String(reps).length * 2.1);
 
-    const allReps = points.flatMap((p) => p.sets.map((s) => s.reps));
-    const maxReps = Math.max(...allReps) * 1.15;
+    const allWeights = points.flatMap((p) => p.sets.map((s) => s.weight));
+    const maxWeight = Math.max(...allWeights, 1) * 1.15;
 
     const xFor = (i) => xForPanel(i, points.length, plotW);
-    const yFor = (reps) => plotH - (reps / maxReps) * plotH;
+    const yFor = (weight) => plotH - (weight / maxWeight) * plotH;
     // 隣の日付の列にはみ出さないよう、1日分のクラスタ幅の上限を列間隔の92%に抑える。
     // 数字入りの円をぴったり並べてもその幅に収まらない日は、その日だけ数字なしの
     // 小さい点に切り替える(無理に詰めて数字が読めなくなるより、タップで詳細を
@@ -778,41 +775,46 @@
     const columnSpacing = points.length > 1 ? plotW / (points.length - 1) : plotW;
     const maxClusterWidth = columnSpacing * 0.92;
 
-    const axis = renderValueAxis(plotW, 0, maxReps, 3, yFor, "回");
+    const axis = renderValueAxis(plotW, 0, maxWeight, 3, yFor, "kg");
 
     let dots = "";
     points.forEach((p, dateIndex) => {
       const baseX = xFor(dateIndex);
       const n = p.sets.length;
+      // 最初/最後の日付はクラスタが片側(内側)にしか伸びられず、隣の日との
+      // 隙間をまるごと使ってしまうので、通常の日の半分の幅までに抑える。
+      const isEdge = dateIndex === 0 || dateIndex === points.length - 1;
+      const dateMaxClusterWidth = isEdge ? maxClusterWidth / 2 : maxClusterWidth;
 
       let useChip = true;
-      let radii = p.sets.map((s) => rForWeight(s.weight));
+      let radii = p.sets.map((s) => rForReps(s.reps));
       let totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
-      if (totalWidth > maxClusterWidth) {
+      if (totalWidth > dateMaxClusterWidth) {
         useChip = false;
-        radii = p.sets.map(() => plainR);
+        radii = p.sets.map(() => 4);
         totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
       }
       // それでも収まらない極端な密集日は、点そのものを縮めて必ず日付間の枠内に収める
       // (タップ領域は別途 hitSize で最低24pxを確保しているので、押しにくくはならない)。
       let clusterGap = gap;
-      if (totalWidth > maxClusterWidth && totalWidth > 0) {
-        const scale = maxClusterWidth / totalWidth;
+      if (totalWidth > dateMaxClusterWidth && totalWidth > 0) {
+        const scale = dateMaxClusterWidth / totalWidth;
         radii = radii.map((r) => r * scale);
         clusterGap = gap * scale;
-        totalWidth = maxClusterWidth;
+        totalWidth = dateMaxClusterWidth;
       }
 
-      let cursor = baseX - totalWidth / 2;
+      // 最初/最後の日付はクラスタの中心が列の端(x=0 or plotW)そのものになるので、
+      // そのままだとグラフの外にはみ出す。プロット内に収まるよう寄せる。
+      let cursor = Math.max(0, Math.min(plotW - totalWidth, baseX - totalWidth / 2));
       p.sets.forEach((s, setIndex) => {
         const r = radii[setIndex];
         const x = cursor + r;
         cursor += r * 2 + clusterGap;
-        const y = yFor(s.reps);
-        const hasWeight = s.weight > 0 && useChip;
+        const y = yFor(s.weight);
         const hitSize = Math.max(24, r * 2 + 4);
-        const label = hasWeight
-          ? `<text class="scatter-dot-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${displayWeight(s.weight)}</text>`
+        const label = useChip
+          ? `<text class="scatter-dot-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${s.reps}</text>`
           : "";
         dots += `
           <g class="chart-mark" data-date-index="${dateIndex}" data-set-index="${setIndex}">
