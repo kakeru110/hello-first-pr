@@ -778,18 +778,19 @@
     const axis = renderValueAxis(plotW, 0, maxWeight, 3, yFor, "kg");
 
     let dots = "";
+    // 日付の並び順に左から配置していき、直前の日のクラスタの右端より内側には
+    // 絶対に置かない(=重ならない)ようにする。最初/最後の日付だけ特別扱いする
+    // クランプ方式だと、隣の日との間隔を丸ごと使い切ってしまい重なりが起きたり、
+    // 逆に余裕があるのに数字なし表示に切り替わってしまったりしたため。
+    let prevRightEdge = -Infinity;
     points.forEach((p, dateIndex) => {
       const baseX = xFor(dateIndex);
       const n = p.sets.length;
-      // 最初/最後の日付はクラスタが片側(内側)にしか伸びられず、隣の日との
-      // 隙間をまるごと使ってしまうので、通常の日の半分の幅までに抑える。
-      const isEdge = dateIndex === 0 || dateIndex === points.length - 1;
-      const dateMaxClusterWidth = isEdge ? maxClusterWidth / 2 : maxClusterWidth;
 
       let useChip = true;
       let radii = p.sets.map((s) => rForReps(s.reps));
       let totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
-      if (totalWidth > dateMaxClusterWidth) {
+      if (totalWidth > maxClusterWidth) {
         useChip = false;
         radii = p.sets.map(() => 4);
         totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
@@ -797,16 +798,36 @@
       // それでも収まらない極端な密集日は、点そのものを縮めて必ず日付間の枠内に収める
       // (タップ領域は別途 hitSize で最低24pxを確保しているので、押しにくくはならない)。
       let clusterGap = gap;
-      if (totalWidth > dateMaxClusterWidth && totalWidth > 0) {
-        const scale = dateMaxClusterWidth / totalWidth;
+      if (totalWidth > maxClusterWidth && totalWidth > 0) {
+        const scale = maxClusterWidth / totalWidth;
         radii = radii.map((r) => r * scale);
         clusterGap = gap * scale;
-        totalWidth = dateMaxClusterWidth;
+        totalWidth = maxClusterWidth;
       }
 
-      // 最初/最後の日付はクラスタの中心が列の端(x=0 or plotW)そのものになるので、
-      // そのままだとグラフの外にはみ出す。プロット内に収まるよう寄せる。
-      let cursor = Math.max(0, Math.min(plotW - totalWidth, baseX - totalWidth / 2));
+      let cursor = baseX - totalWidth / 2;
+      cursor = Math.max(cursor, prevRightEdge + clusterGap); // 直前の日と重ねない
+      cursor = Math.max(0, cursor); // プロット左端に収める
+      // 右端をはみ出す場合は、直前の日と重なるほうへ戻すのではなく、この日の
+      // クラスタ自体を残りスペースに収める。数字入りのままだと小さくなりすぎて
+      // 読めなくなる場合は、先に数字なしの小さい点へ切り替えてから収める。
+      if (cursor + totalWidth > plotW) {
+        const available = Math.max(0, plotW - cursor);
+        if (useChip && available < totalWidth) {
+          useChip = false;
+          radii = p.sets.map(() => 4);
+          totalWidth = radii.reduce((sum, r) => sum + r * 2, 0) + gap * (n - 1);
+          clusterGap = gap;
+        }
+        if (available < totalWidth) {
+          const scale = totalWidth > 0 ? Math.max(0.4, available / totalWidth) : 1;
+          radii = radii.map((r) => r * scale);
+          clusterGap *= scale;
+          totalWidth *= scale;
+        }
+      }
+      prevRightEdge = cursor + totalWidth;
+
       p.sets.forEach((s, setIndex) => {
         const r = radii[setIndex];
         const x = cursor + r;
@@ -862,12 +883,12 @@
       .map((p, i) => {
         const x = xFor(i);
         const y = yFor(p.volume);
-        // 両端の棒は軸ラベルやグラフ端にはみ出さないよう、中心位置は保ちつつ内側にクランプする
-        const barLeft = Math.max(0, x - barWidth / 2);
-        const barRight = Math.min(plotW, x + barWidth / 2);
+        // 両端の棒は軸ラベルやグラフ端にはみ出さないよう、幅は保ったまま内側にずらす
+        // (幅だけ切り詰めると両端の棒が細く見えてしまうため)
+        const barLeft = Math.max(0, Math.min(plotW - barWidth, x - barWidth / 2));
         return `
           <g class="chart-mark" data-date-index="${i}">
-            <rect class="volume-bar" x="${barLeft.toFixed(1)}" y="${y.toFixed(1)}" width="${(barRight - barLeft).toFixed(1)}" height="${(plotH - y).toFixed(1)}"></rect>
+            <rect class="volume-bar" x="${barLeft.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${(plotH - y).toFixed(1)}"></rect>
             <rect class="chart-hit" x="${x - 16}" y="0" width="32" height="${plotH}"></rect>
           </g>
         `;
