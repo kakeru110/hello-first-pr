@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>筋トレ記録</title>
-<link rel="stylesheet" href="style.css?v=15">
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 <header class="app-header">
@@ -22,27 +22,6 @@
 </header>
 
 <main>
-  <section class="card" aria-labelledby="sync-heading">
-    <details id="sync-details">
-      <summary id="sync-heading">GitHub同期の設定</summary>
-      <p class="import-help">
-        GitHub の個人アクセストークンを登録すると、記録が <code>kakeru110/hello-first-pr</code> リポジトリの
-        <code>data/records.json</code> に保存され、同じトークンを登録した端末どうしで記録が同期されます。
-        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">トークン発行ページ</a>
-        で対象リポジトリをこのリポジトリのみに限定し、Contents 権限を Read and write にして発行してください。
-      </p>
-      <div class="field-row">
-        <label for="github-token">個人アクセストークン</label>
-        <input type="password" id="github-token" placeholder="github_pat_... または ghp_...">
-      </div>
-      <div class="sync-actions">
-        <button type="button" id="github-save-btn" class="btn-primary">保存して同期</button>
-        <button type="button" id="github-disconnect-btn" class="btn-primary btn-secondary">同期を解除</button>
-      </div>
-      <p id="sync-status" class="sync-status">GitHub同期: 無効（この端末内にのみ保存されます）</p>
-    </details>
-  </section>
-
   <section class="card" aria-labelledby="form-heading">
     <h2 id="form-heading">記録を追加</h2>
     <form id="record-form">
@@ -137,13 +116,34 @@
     </div>
     <div id="history-list"></div>
   </section>
+
+  <section class="card" aria-labelledby="sync-heading">
+    <details id="sync-details">
+      <summary id="sync-heading">GitHub同期の設定</summary>
+      <p class="import-help">
+        GitHub の個人アクセストークンを登録すると、記録が <code>kakeru110/hello-first-pr</code> リポジトリの
+        <code>data/records.json</code> に保存され、同じトークンを登録した端末どうしで記録が同期されます。
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">トークン発行ページ</a>
+        で対象リポジトリをこのリポジトリのみに限定し、Contents 権限を Read and write にして発行してください。
+      </p>
+      <div class="field-row">
+        <label for="github-token">個人アクセストークン</label>
+        <input type="password" id="github-token" placeholder="github_pat_... または ghp_...">
+      </div>
+      <div class="sync-actions">
+        <button type="button" id="github-save-btn" class="btn-primary">保存して同期</button>
+        <button type="button" id="github-disconnect-btn" class="btn-primary btn-secondary">同期を解除</button>
+      </div>
+      <p id="sync-status" class="sync-status">GitHub同期: 無効（この端末内にのみ保存されます）</p>
+    </details>
+  </section>
 </main>
 
 <footer class="app-footer">
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=15"></script>
-<script src="app.js?v=15"></script>
+<script src="sync.js?v=16"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>
