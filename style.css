@@ -101,6 +101,12 @@ body {
   letter-spacing: -0.02em;
 }
 
+.brand h1 {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
 .subtitle {
   margin: 0;
   color: var(--text-secondary);
