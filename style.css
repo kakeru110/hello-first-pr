@@ -71,6 +71,40 @@ body {
   margin: 0 auto;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-row .breadcrumb {
+  margin: 0;
+}
+
+.theme-toggle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-toggle:hover {
+  background: var(--page-plane);
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -454,10 +488,6 @@ select:disabled {
   margin: 0;
 }
 
-.history-header select {
-  max-width: 50%;
-}
-
 .day-card {
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -601,8 +631,20 @@ select:disabled {
   border-top: 1px solid var(--gridline);
 }
 
-#exercise-list .record-item:first-child {
+#exercise-list .record-item:first-child,
+#bodyweight-list .record-item:first-child {
   border-top: none;
+}
+
+#chart-bodyweight {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  margin-top: 4px;
+}
+
+#bodyweight-list {
+  margin-top: 4px;
 }
 
 .record-main {
@@ -689,6 +731,11 @@ select:disabled {
 .chart-mark:hover .scatter-dot {
   fill-opacity: 1;
   stroke: var(--series-1);
+}
+
+.scatter-dot.is-pr {
+  stroke: var(--status-good);
+  stroke-width: 2.5;
 }
 
 .scatter-dot-label {
