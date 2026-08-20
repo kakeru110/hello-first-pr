@@ -99,6 +99,8 @@
   const form = document.getElementById("record-form");
   const dateInput = document.getElementById("date");
   const exerciseInput = document.getElementById("exercise");
+  const weightLabel = document.getElementById("weight-label");
+  const repsLabel = document.getElementById("reps-label");
   const noExerciseHint = document.getElementById("no-exercise-hint");
   const addRecordBtn = document.getElementById("add-record-btn");
   const weightInput = document.getElementById("weight");
@@ -201,6 +203,16 @@
 
   filterExercise.addEventListener("change", renderHistory);
   chartExercise.addEventListener("change", renderChart);
+
+  // 有酸素の種目を選んだときは、フォームのラベルを「重量・回数」から
+  // 「強度・時間」に切り替える(バイクの負荷やランの時間などを入れやすくするため)。
+  // 保存する項目自体はweight/repsのまま(グラフ・同期の仕組みを変えないため)。
+  function updateWeightRepsLabels() {
+    const isCardio = MuscleSync.isCardioExercise(exerciseInput.value);
+    weightLabel.textContent = isCardio ? "強度" : "重量 (kg)";
+    repsLabel.textContent = isCardio ? "時間 (分)" : "回数";
+  }
+  exerciseInput.addEventListener("change", updateWeightRepsLabels);
   chartRange.addEventListener("change", renderChart);
 
   importBtn.addEventListener("click", function () {
@@ -524,6 +536,7 @@
       : '<option value="" disabled>まず種目を追加してください</option>';
     exerciseInput.innerHTML = placeholder + renderGroupedOptionsHtml(allNames);
     exerciseInput.value = allNames.includes(prevFormValue) ? prevFormValue : "";
+    updateWeightRepsLabels();
 
     const usedNames = getUsedExerciseNames();
 
