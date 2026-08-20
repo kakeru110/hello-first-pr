@@ -14,18 +14,10 @@
   const CHART_MARGIN = { top: 14, right: 12, left: 54 };
 
   // 種目名から部位を推定する(2週間平均を部位単位でまとめて見せるため)。
-  // 判定は上から優先度順、どれにも当てはまらなければ「その他」としてその種目単独で扱う。
-  const MUSCLE_GROUPS = [
-    { key: "cardio", label: "有酸素", test: MuscleSync.isCardioExercise },
-    { key: "chest", label: "胸", test: (n) => /ベンチ|チェストプレス|フライ/.test(n) },
-    { key: "back", label: "背中", test: (n) => /ロー|ラットプル|プルダウン|デッドリフト|懸垂/.test(n) },
-    { key: "shoulder", label: "肩", test: (n) => /ミリタリー|ショルダー/.test(n) },
-    { key: "arm", label: "腕", test: (n) => /カール|トライセプス/.test(n) },
-    { key: "leg", label: "脚", test: (n) => /スクワット|レッグ|ランジ/.test(n) },
-  ];
-
+  // 判定は sync.js の共通ロジックに委譲し、どれにも当てはまらなければ
+  // 「その他」としてその種目単独で扱う。
   function categoryForExercise(name) {
-    const found = MUSCLE_GROUPS.find((g) => g.test(name));
+    const found = MuscleSync.muscleGroupForExercise(name);
     return found ? { key: found.key, label: found.label } : { key: `other:${name}`, label: name };
   }
 
@@ -69,7 +61,7 @@
   function groupExerciseNamesForSelect(names) {
     const buckets = new Map();
     names.forEach((n) => {
-      const found = MUSCLE_GROUPS.find((g) => g.test(n));
+      const found = MuscleSync.muscleGroupForExercise(n);
       const key = found ? found.key : "other";
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key).push(n);
@@ -120,9 +112,6 @@
   const chartEmpty = document.getElementById("chart-empty");
   const chartDetail = document.getElementById("chart-detail");
   const CHART_DETAIL_PLACEHOLDER = "グラフの点をタップすると詳細が表示されます";
-  const importText = document.getElementById("import-text");
-  const importBtn = document.getElementById("import-btn");
-  const importResult = document.getElementById("import-result");
   const githubTokenInput = document.getElementById("github-token");
   const githubSaveBtn = document.getElementById("github-save-btn");
   const githubDisconnectBtn = document.getElementById("github-disconnect-btn");
@@ -215,121 +204,6 @@
   exerciseInput.addEventListener("change", updateWeightRepsLabels);
   chartRange.addEventListener("change", renderChart);
 
-  importBtn.addEventListener("click", function () {
-    const { parsed, warnings } = parseBulkLog(importText.value);
-    if (parsed.length) {
-      // exercises との比較は records に concat する前に行う
-      // (records にはすでに反映済みという理由で登録漏れになるのを防ぐため)
-      const existingNames = new Set(exercises);
-      const newNames = Array.from(new Set(parsed.map((r) => r.exercise))).filter((n) => !existingNames.has(n));
-
-      records = records.concat(parsed);
-      saveRecords();
-      pushToGithub({ type: "add-many", records: parsed });
-
-      if (newNames.length) {
-        exercises = exercises.concat(newNames).sort(MuscleSync.compareExerciseNames);
-        saveExercises();
-        pushExercisesToGithub({ type: "add-many", names: newNames });
-      }
-
-      renderAll();
-    }
-    renderImportResult(parsed.length, warnings);
-    if (parsed.length && !warnings.length) {
-      importText.value = "";
-    }
-  });
-
-  function renderImportResult(count, warnings) {
-    importResult.hidden = false;
-    const successHtml = count
-      ? `<p class="import-success">${count}件を追加しました</p>`
-      : `<p class="import-success" style="color:var(--status-critical)">取り込める記録が見つかりませんでした</p>`;
-    const warningsHtml = warnings.length
-      ? `<ul class="import-warnings">${warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join("")}</ul>`
-      : "";
-    importResult.innerHTML = successHtml + warningsHtml;
-  }
-
-  // 「YYMMDD場所」の見出し行 + 「種目名 重量-回数, 重量-回数, .../」形式のテキストを
-  // records と同じ形の配列にパースする。同じ重量・回数が連続する行は sets にまとめる。
-  function parseBulkLog(text) {
-    const parsed = [];
-    const warnings = [];
-    const blocks = text.trim().split(/\n\s*\n/).filter((b) => b.trim());
-
-    blocks.forEach((block) => {
-      const lines = block
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
-      if (!lines.length) return;
-
-      const headerMatch = lines[0].match(/^(\d{2})(\d{2})(\d{2})/);
-      if (!headerMatch) {
-        warnings.push(`日付を認識できませんでした: "${lines[0]}"`);
-        return;
-      }
-      const date = `20${headerMatch[1]}-${headerMatch[2]}-${headerMatch[3]}`;
-
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].replace(/\/\s*$/, "").trim();
-        if (!line) continue;
-
-        const nameMatch = line.match(/^([^\d]+)/);
-        if (!nameMatch) {
-          warnings.push(`種目名を認識できませんでした: "${line}" (${date})`);
-          continue;
-        }
-        const exercise = nameMatch[1].trim();
-        const tokens = line
-          .slice(nameMatch[0].length)
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean);
-
-        if (!tokens.length) {
-          warnings.push(`重量・回数を認識できませんでした: "${line}" (${date})`);
-          continue;
-        }
-
-        const sets = [];
-        tokens.forEach((tok) => {
-          let m;
-          if ((m = tok.match(/^(\d+(?:\.\d+)?)-(\d+)$/))) {
-            sets.push({ weight: parseFloat(m[1]), reps: parseInt(m[2], 10) });
-          } else if ((m = tok.match(/^(\d+(?:\.\d+)?)$/))) {
-            sets.push({ weight: 0, reps: parseInt(m[1], 10) });
-          } else {
-            warnings.push(`認識できないデータを除外しました: "${exercise} ${tok}" (${date})`);
-          }
-        });
-
-        const isCardio = MuscleSync.isCardioExercise(exercise);
-        let idx = 0;
-        while (idx < sets.length) {
-          let end = idx + 1;
-          while (end < sets.length && sets[end].weight === sets[idx].weight && sets[end].reps === sets[idx].reps) {
-            end++;
-          }
-          parsed.push({
-            id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}-${idx}`,
-            date,
-            exercise,
-            weight: sets[idx].weight,
-            reps: sets[idx].reps,
-            sets: end - idx,
-            memo: isCardio ? "有酸素" : "",
-          });
-          idx = end;
-        }
-      }
-    });
-
-    return { parsed, warnings };
-  }
-
   function loadRecords() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -400,10 +274,6 @@
       if (baseRecords.some((r) => r.id === pendingChange.record.id)) return baseRecords.slice();
       return baseRecords.concat([pendingChange.record]);
     }
-    if (pendingChange.type === "add-many") {
-      const existingIds = new Set(baseRecords.map((r) => r.id));
-      return baseRecords.concat(pendingChange.records.filter((r) => !existingIds.has(r.id)));
-    }
     if (pendingChange.type === "delete") {
       return baseRecords.filter((r) => r.id !== pendingChange.id);
     }
@@ -460,10 +330,6 @@
     if (!pendingChange) return baseNames.slice();
     if (pendingChange.type === "add") {
       return baseNames.includes(pendingChange.name) ? baseNames.slice() : baseNames.concat([pendingChange.name]);
-    }
-    if (pendingChange.type === "add-many") {
-      const existing = new Set(baseNames);
-      return baseNames.concat(pendingChange.names.filter((n) => !existing.has(n)));
     }
     if (pendingChange.type === "delete") {
       return baseNames.filter((n) => n !== pendingChange.name);
