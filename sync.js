@@ -107,6 +107,59 @@ window.MuscleSync = (function () {
     return MUSCLE_GROUPS.find((g) => g.test(name)) || null;
   }
 
+  // ライト/ダークの手動切り替え。未設定(""）ならOS設定(prefers-color-scheme)に従う。
+  // <head>内のインラインスクリプトで先に data-theme を反映しているため、ここでは
+  // トグルボタンの見た目と切り替え処理だけを担当する。
+  const THEME_KEY = "muscleLog.theme";
+  const SUN_ICON =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>';
+  const MOON_ICON =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 9.5A6 6 0 1 1 6.5 2.5a5 5 0 0 0 7 7Z"/></svg>';
+
+  function getTheme() {
+    return localStorage.getItem(THEME_KEY) || "";
+  }
+
+  function setTheme(theme) {
+    if (theme === "light" || theme === "dark") {
+      localStorage.setItem(THEME_KEY, theme);
+      document.documentElement.setAttribute("data-theme", theme);
+    } else {
+      localStorage.removeItem(THEME_KEY);
+      document.documentElement.removeAttribute("data-theme");
+    }
+  }
+
+  function effectiveTheme() {
+    const stored = getTheme();
+    if (stored) return stored;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  function initThemeToggle(buttonEl) {
+    if (!buttonEl) return;
+    function render() {
+      const eff = effectiveTheme();
+      buttonEl.innerHTML = eff === "dark" ? SUN_ICON : MOON_ICON;
+      buttonEl.setAttribute("aria-label", eff === "dark" ? "ライトモードに切り替え" : "ダークモードに切り替え");
+    }
+    buttonEl.addEventListener("click", function () {
+      setTheme(effectiveTheme() === "dark" ? "light" : "dark");
+      render();
+    });
+    render();
+  }
+
+  // ホーム画面に追加してオフラインでも開けるようにするService Worker登録。
+  // 対応ブラウザのみ、ページ読み込み完了後に登録する(失敗してもアプリ自体は動く)。
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function (err) {
+        console.error("service worker registration failed", err);
+      });
+    });
+  }
+
   return {
     GITHUB_OWNER,
     GITHUB_REPO,
@@ -119,5 +172,9 @@ window.MuscleSync = (function () {
     isCardioExercise,
     compareExerciseNames,
     muscleGroupForExercise,
+    getTheme,
+    setTheme,
+    effectiveTheme,
+    initThemeToggle,
   };
 })();

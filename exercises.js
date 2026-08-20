@@ -26,6 +26,8 @@
   const categoryPreview = document.getElementById("category-preview");
   const categoryPreviewLabel = document.getElementById("category-preview-label");
 
+  MuscleSync.initThemeToggle(document.getElementById("theme-toggle"));
+
   render();
 
   nameInput.addEventListener("input", updateCategoryPreview);

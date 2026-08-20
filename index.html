@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIGNAL - 筋トレ記録</title>
+<script>
+(function () {
+  var t = localStorage.getItem("muscleLog.theme");
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#17181c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap">
@@ -11,16 +22,19 @@
 </head>
 <body>
 <header class="app-header">
-  <div class="brand">
-    <span class="brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 12h16M4 8.5v7M20 8.5v7M1.5 10v4M22.5 10v4"/>
-      </svg>
-    </span>
-    <div>
-      <h1>SIGNAL</h1>
-      <p class="subtitle">筋トレ記録 — 種目・重量・回数を記録して、成長をグラフで確認できます</p>
+  <div class="header-row">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12h16M4 8.5v7M20 8.5v7M1.5 10v4M22.5 10v4"/>
+        </svg>
+      </span>
+      <div>
+        <h1>SIGNAL</h1>
+        <p class="subtitle">筋トレ記録 — 種目・重量・回数を記録して、成長をグラフで確認できます</p>
+      </div>
     </div>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="表示テーマを切り替え"></button>
   </div>
 </header>
 
@@ -65,6 +79,26 @@
     <div id="today-list"></div>
   </section>
 
+  <section class="card" aria-labelledby="bodyweight-heading">
+    <h2 id="bodyweight-heading">体重を記録</h2>
+    <form id="bodyweight-form">
+      <div class="field-row inline">
+        <div>
+          <label for="bodyweight-date">日付</label>
+          <input type="date" id="bodyweight-date" required>
+        </div>
+        <div>
+          <label for="bodyweight-value">体重 (kg)</label>
+          <input type="number" id="bodyweight-value" min="0" step="0.1" inputmode="decimal" required>
+        </div>
+      </div>
+      <button type="submit" id="add-bodyweight-btn" class="btn-primary">記録する</button>
+    </form>
+    <p id="bodyweight-empty" class="empty-message">まだ体重の記録がありません</p>
+    <svg id="chart-bodyweight" viewBox="0 0 640 130" role="img" aria-label="体重の推移" hidden></svg>
+    <div id="bodyweight-list"></div>
+  </section>
+
   <section class="card" aria-labelledby="chart-heading">
     <h2 id="chart-heading">進捗グラフ</h2>
     <div class="chart-controls">
@@ -89,7 +123,7 @@
       <p class="chart-panel-hint">縦位置が重量、丸の中の数字が回数。同じ日の複数セットは左から順に表示</p>
       <div id="chart-panels">
         <div class="chart-panel">
-          <p class="chart-panel-label">重量(kg) ・ 回数(丸の中の数字)</p>
+          <p class="chart-panel-label">重量(kg) ・ 回数(丸の中の数字) <span id="chart-pr-badge" class="volume-badge" hidden></span></p>
           <svg id="chart-weight-reps" viewBox="0 0 640 130" role="img" aria-label="重量と回数"></svg>
         </div>
         <div class="chart-panel">
@@ -107,9 +141,28 @@
   <section class="card" aria-labelledby="history-heading">
     <div class="history-header">
       <h2 id="history-heading">記録一覧</h2>
-      <select id="filter-exercise">
-        <option value="">すべての種目</option>
-      </select>
+    </div>
+    <div class="chart-controls">
+      <div class="chart-control-item">
+        <label for="filter-exercise">種目</label>
+        <select id="filter-exercise">
+          <option value="">すべての種目</option>
+        </select>
+      </div>
+      <div class="chart-control-item">
+        <label for="history-range">期間</label>
+        <select id="history-range">
+          <option value="28">直近4週間</option>
+          <option value="56">直近8週間</option>
+          <option value="90">直近3ヶ月</option>
+          <option value="180">直近6ヶ月</option>
+          <option value="all" selected>全期間</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <label for="history-search">検索(メモ・種目名)</label>
+      <input type="search" id="history-search" placeholder="例: 懸垂、フォーム、痛み">
     </div>
     <div id="history-list"></div>
   </section>
