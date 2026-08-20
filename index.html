@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=29">
+<link rel="stylesheet" href="style.css?v=30">
 </head>
 <body>
 <header class="app-header">
@@ -77,26 +77,6 @@
   <section class="card" id="today-section" aria-labelledby="today-heading" hidden>
     <h2 id="today-heading">本日の記録</h2>
     <div id="today-list"></div>
-  </section>
-
-  <section class="card" aria-labelledby="bodyweight-heading">
-    <h2 id="bodyweight-heading">体重を記録</h2>
-    <form id="bodyweight-form">
-      <div class="field-row inline">
-        <div>
-          <label for="bodyweight-date">日付</label>
-          <input type="date" id="bodyweight-date" required>
-        </div>
-        <div>
-          <label for="bodyweight-value">体重 (kg)</label>
-          <input type="number" id="bodyweight-value" min="0" step="0.1" inputmode="decimal" required>
-        </div>
-      </div>
-      <button type="submit" id="add-bodyweight-btn" class="btn-primary">記録する</button>
-    </form>
-    <p id="bodyweight-empty" class="empty-message">まだ体重の記録がありません</p>
-    <svg id="chart-bodyweight" viewBox="0 0 640 130" role="img" aria-label="体重の推移" hidden></svg>
-    <div id="bodyweight-list"></div>
   </section>
 
   <section class="card" aria-labelledby="chart-heading">
@@ -167,6 +147,28 @@
     <div id="history-list"></div>
   </section>
 
+  <section class="card" aria-labelledby="bodyweight-heading">
+    <details id="bodyweight-details">
+      <summary id="bodyweight-heading">体重を記録</summary>
+      <form id="bodyweight-form">
+        <div class="field-row inline">
+          <div>
+            <label for="bodyweight-date">日付</label>
+            <input type="date" id="bodyweight-date" required>
+          </div>
+          <div>
+            <label for="bodyweight-value">体重 (kg)</label>
+            <input type="number" id="bodyweight-value" min="0" step="0.1" inputmode="decimal" required>
+          </div>
+        </div>
+        <button type="submit" id="add-bodyweight-btn" class="btn-primary">記録する</button>
+      </form>
+      <p id="bodyweight-empty" class="empty-message">まだ体重の記録がありません</p>
+      <svg id="chart-bodyweight" viewBox="0 0 640 130" role="img" aria-label="体重の推移" hidden></svg>
+      <div id="bodyweight-list"></div>
+    </details>
+  </section>
+
   <section class="card" aria-labelledby="sync-heading">
     <details id="sync-details">
       <summary id="sync-heading">GitHub同期の設定</summary>
@@ -193,7 +195,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=29"></script>
-<script src="app.js?v=29"></script>
+<script src="sync.js?v=30"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>

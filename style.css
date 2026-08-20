@@ -335,7 +335,8 @@ select:disabled {
   font-size: 0.78rem;
 }
 
-#sync-details summary {
+#sync-details summary,
+#bodyweight-details summary {
   cursor: pointer;
   font-size: 1.05rem;
   font-weight: 600;
@@ -353,6 +354,10 @@ select:disabled {
 #sync-details #github-token {
   width: 100%;
   margin-top: 4px;
+}
+
+#bodyweight-details #bodyweight-form {
+  margin-top: 12px;
 }
 
 .sync-actions {
