@@ -129,6 +129,9 @@
   const chartVolumeAvgSvg = document.getElementById("chart-volume-avg");
   const volumeAvgCategoryLabel = document.getElementById("volume-avg-category");
   const chartPrBadge = document.getElementById("chart-pr-badge");
+  const chartPanelHint = document.getElementById("chart-panel-hint");
+  const chartWeightRepsLabel = document.getElementById("chart-weight-reps-label");
+  const chartVolumeLabel = document.getElementById("chart-volume-label");
   const chartEmpty = document.getElementById("chart-empty");
   const chartDetail = document.getElementById("chart-detail");
   const CHART_DETAIL_PLACEHOLDER = "グラフの点をタップすると詳細が表示されます";
@@ -751,13 +754,22 @@
     const categoryPoints = computeCategoryChartData(category);
     volumeAvgCategoryLabel.textContent = category.key.startsWith("other:") ? "" : category.label;
 
+    // 有酸素種目は「重量・回数」ではなく「強度・時間」で記録するため(フォームの
+    // ラベル切り替えと同じ判定)、グラフ側のラベル・軸の単位もkg表記にしない。
+    const isCardio = MuscleSync.isCardioExercise(exercise);
+    chartPanelHint.textContent = isCardio
+      ? "縦位置が強度、丸の中の数字が時間(分)。同じ日の複数セットは左から順に表示"
+      : "縦位置が重量、丸の中の数字が回数。同じ日の複数セットは左から順に表示";
+    chartWeightRepsLabel.textContent = isCardio ? "強度 ・ 時間(丸の中の数字・分)" : "重量(kg) ・ 回数(丸の中の数字)";
+    chartVolumeLabel.textContent = isCardio ? "ボリューム (強度×時間×セット)" : "ボリューム (重量×回数×セット)";
+
     const pr = computePR(exercise);
     chartPrBadge.hidden = pr === null;
-    if (pr !== null) chartPrBadge.textContent = `自己ベスト ${pr}kg`;
+    if (pr !== null) chartPrBadge.textContent = isCardio ? `自己ベスト強度 ${pr}` : `自己ベスト ${pr}kg`;
 
-    renderWeightRepsPanel(chartWeightRepsSvg, visiblePoints, 130, pr);
-    renderVolumePanel(chartVolumeSvg, visiblePoints, 130);
-    renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130, cutoff);
+    renderWeightRepsPanel(chartWeightRepsSvg, visiblePoints, 130, pr, isCardio);
+    renderVolumePanel(chartVolumeSvg, visiblePoints, 130, isCardio);
+    renderVolumeAvgPanel(chartVolumeAvgSvg, categoryPoints, 130, cutoff, category.key === "cardio");
   }
 
   // データ点をプロット幅いっぱい(0〜plotW)に配置すると、点数が少ない時に
@@ -800,7 +812,7 @@
   // 回数を縦位置(日をまたいだ推移が見えるように)、重量は点の大きさではなく
   // 点の中の数字でそのまま表示する(大きさの見分けづらさの指摘への対応)。
   // 同じ日の複数セットは横に少しずらして並べるので、1セットずつが点として見える。
-  function renderWeightRepsPanel(svgEl, points, height, pr) {
+  function renderWeightRepsPanel(svgEl, points, height, pr, isCardio) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
@@ -821,7 +833,7 @@
     const columnSpacing = points.length > 1 ? plotW / (points.length - 1) : plotW;
     const maxClusterWidth = columnSpacing * 0.92;
 
-    const axis = renderValueAxis(plotW, 0, maxWeight, 3, yFor, "kg");
+    const axis = renderValueAxis(plotW, 0, maxWeight, 3, yFor, isCardio ? "" : "kg");
 
     let dots = "";
     // 日付の並び順に左から配置していき、直前の日のクラスタの右端より内側には
@@ -914,7 +926,7 @@
 
   // ボリューム(重量×回数×セット)を棒グラフで表示するパネル。上のパネルと同じ
   // x位置(=同じ日付)を共有しているので、縦に見比べれば実質「同じグラフ」として読める。
-  function renderVolumePanel(svgEl, points, height) {
+  function renderVolumePanel(svgEl, points, height, isCardio) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
@@ -924,7 +936,7 @@
     const yFor = (v) => plotH - (v / maxV) * plotH;
     const barWidth = Math.min(22, (plotW / points.length) * 0.55);
 
-    const axis = renderValueAxis(plotW, 0, maxV, 3, yFor, "kg");
+    const axis = renderValueAxis(plotW, 0, maxV, 3, yFor, isCardio ? "" : "kg");
 
     const bars = points
       .map((p, i) => {
@@ -981,7 +993,7 @@
   // 同じx位置(=同じ日付)を共有しているので、縦に見比べれば実質「同じグラフ」として読める。
   // 移動平均自体は部位の全履歴(points)から計算してから期間で絞り込む。そうしないと
   // 表示範囲の先頭付近の平均が「直近14日分」に満たない不正確な値になってしまうため。
-  function renderVolumeAvgPanel(svgEl, points, height, cutoff) {
+  function renderVolumeAvgPanel(svgEl, points, height, cutoff, isCardio) {
     const plotW = CHART_WIDTH - CHART_MARGIN.left - CHART_MARGIN.right;
     const plotH = height - CHART_MARGIN.top - 20;
 
@@ -1001,7 +1013,7 @@
     const xFor = (i) => xForPanel(i, avgPoints.length, plotW);
     const yFor = (v) => plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-    const axis = renderValueAxis(plotW, minV, maxV, 3, yFor, "kg");
+    const axis = renderValueAxis(plotW, minV, maxV, 3, yFor, isCardio ? "" : "kg");
 
     const pathD = avgPoints
       .map((p, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(p.avg).toFixed(1)}`)
