@@ -1,34 +1,36 @@
 :root {
   color-scheme: light;
   --surface-1: #ffffff;
-  --page-plane: #f6f6f4;
-  --text-primary: #131316;
-  --text-secondary: #5c5c66;
-  --text-muted: #98989f;
-  --gridline: #e9e9ec;
-  --baseline: #cfcfd6;
-  --border: rgba(19, 19, 22, 0.08);
-  --series-1: #4338ca;
-  --series-1-tint: rgba(67, 56, 202, 0.12);
-  --series-1-ink: #ffffff;
+  --page-plane: #f4f3ef;
+  --text-primary: #17181c;
+  --text-secondary: #6c6a63;
+  --text-muted: #9c978b;
+  --gridline: #dad8d0;
+  --baseline: #c7c1b2;
+  --border: #dad8d0;
+  --series-1: #ff5a2b;
+  --series-1-tint: rgba(255, 90, 43, 0.12);
+  --series-1-ink: #17181c;
   --status-good: #16a34a;
   --status-critical: #e5484d;
+  --font-display: "IBM Plex Sans JP", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "IBM Plex Sans JP", ui-monospace, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --surface-1: #18181c;
-    --page-plane: #0a0a0c;
-    --text-primary: #f6f6f7;
-    --text-secondary: #b3b3bb;
-    --text-muted: #7d7d86;
-    --gridline: #27272c;
-    --baseline: #3a3a41;
-    --border: rgba(255, 255, 255, 0.10);
-    --series-1: #8a7cf8;
-    --series-1-tint: rgba(138, 124, 248, 0.16);
-    --series-1-ink: #1c1730;
+    --surface-1: #1b1a17;
+    --page-plane: #121110;
+    --text-primary: #f2f0ea;
+    --text-secondary: #a8a398;
+    --text-muted: #726d61;
+    --gridline: #2c2a25;
+    --baseline: #3d3a32;
+    --border: #2c2a25;
+    --series-1: #ff6b3d;
+    --series-1-tint: rgba(255, 107, 61, 0.18);
+    --series-1-ink: #17181c;
     --status-good: #22c55e;
     --status-critical: #ff6369;
   }
@@ -36,17 +38,17 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --surface-1: #18181c;
-  --page-plane: #0a0a0c;
-  --text-primary: #f6f6f7;
-  --text-secondary: #b3b3bb;
-  --text-muted: #7d7d86;
-  --gridline: #27272c;
-  --baseline: #3a3a41;
-  --border: rgba(255, 255, 255, 0.10);
-  --series-1: #8a7cf8;
-  --series-1-tint: rgba(138, 124, 248, 0.16);
-  --series-1-ink: #1c1730;
+  --surface-1: #1b1a17;
+  --page-plane: #121110;
+  --text-primary: #f2f0ea;
+  --text-secondary: #a8a398;
+  --text-muted: #726d61;
+  --gridline: #2c2a25;
+  --baseline: #3d3a32;
+  --border: #2c2a25;
+  --series-1: #ff6b3d;
+  --series-1-tint: rgba(255, 107, 61, 0.18);
+  --series-1-ink: #17181c;
   --status-good: #22c55e;
   --status-critical: #ff6369;
 }
@@ -57,7 +59,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  font-family: var(--font-display);
   background: var(--page-plane);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -79,8 +81,8 @@ body {
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  background: var(--series-1);
+  border-radius: 8px;
+  background: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,6 +91,7 @@ body {
 .brand-mark svg {
   width: 20px;
   height: 20px;
+  stroke: var(--page-plane);
 }
 
 .app-header h1 {
@@ -116,16 +119,19 @@ main {
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 4px;
   padding: 14px 16px;
-  box-shadow: 0 1px 2px rgba(19, 19, 22, 0.03);
 }
 
 .card h2 {
-  margin: 0 0 10px;
-  font-size: 0.95rem;
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--gridline);
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 #record-form {
@@ -163,6 +169,11 @@ main {
   height: 40px;
 }
 
+#weight, #reps {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
 /* iOS Safariはtype="date"に大きめの内部レイアウトを強制してくるため、
    appearanceをリセットしてheight/paddingが効くようにする */
 input[type="date"] {
@@ -190,8 +201,11 @@ label {
 .add-exercise-link {
   flex-shrink: 0;
   font-size: 0.85rem;
-  color: var(--series-1);
-  text-decoration: none;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--baseline);
+  text-underline-offset: 2px;
   white-space: nowrap;
 }
 
@@ -205,8 +219,11 @@ label {
 
 .breadcrumb a {
   font-size: 0.85rem;
-  color: var(--series-1);
-  text-decoration: none;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--baseline);
+  text-underline-offset: 2px;
 }
 
 .breadcrumb a:hover {
@@ -216,9 +233,9 @@ label {
 input, select {
   font: inherit;
   padding: 8px 10px;
-  border-radius: 9px;
+  border-radius: 3px;
   border: 1px solid var(--baseline);
-  background: var(--surface-1);
+  background: var(--page-plane);
   color: var(--text-primary);
 }
 
@@ -229,14 +246,14 @@ input:focus, select:focus {
 
 .btn-primary {
   margin-top: 4px;
-  padding: 10px 16px;
-  border-radius: 999px;
+  padding: 11px 16px;
+  border-radius: 4px;
   border: none;
-  background: var(--series-1);
-  color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  background: var(--text-primary);
+  color: var(--page-plane);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition: filter 0.12s ease, transform 0.05s ease;
 }
@@ -293,7 +310,7 @@ select:disabled {
 
 #import-text {
   width: 100%;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   resize: vertical;
   margin-bottom: 10px;
@@ -303,7 +320,7 @@ select:disabled {
   margin-top: 12px;
   font-size: 0.85rem;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--page-plane);
 }
 
@@ -334,7 +351,8 @@ select:disabled {
 }
 
 #sync-details .import-help a {
-  color: var(--series-1);
+  color: var(--text-primary);
+  text-decoration-color: var(--baseline);
 }
 
 #sync-details #github-token {
@@ -434,7 +452,7 @@ select:disabled {
 .chart-detail {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 8px 12px;
   margin-bottom: 10px;
   min-height: 20px;
@@ -445,14 +463,14 @@ select:disabled {
 
 .chart-detail .tooltip-date {
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
   color: var(--text-primary);
   margin-bottom: 2px;
 }
 
 .chart-detail .tooltip-row {
   color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
 }
 
 .chart-detail .tooltip-detail {
@@ -481,7 +499,7 @@ select:disabled {
 
 .day-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 8px 14px;
   margin-bottom: 6px;
   background: var(--page-plane);
@@ -527,8 +545,8 @@ select:disabled {
   font-size: 0.85rem;
   color: var(--text-primary);
   font-weight: 700;
+  font-family: var(--font-mono);
   margin: 0 auto 0 0;
-  font-variant-numeric: tabular-nums;
 }
 
 .exercise-group {
@@ -556,9 +574,10 @@ select:disabled {
 .volume-badge {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--series-1);
-  background: var(--series-1-tint);
-  border-radius: 999px;
+  font-family: var(--font-mono);
+  color: var(--page-plane);
+  background: var(--text-primary);
+  border-radius: 3px;
   padding: 2px 8px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -580,12 +599,13 @@ select:disabled {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--surface-1);
+  background: var(--page-plane);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 3px;
   padding: 4px 4px 4px 10px;
   font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-weight: 500;
 }
 
 .set-chip-delete {
@@ -714,7 +734,7 @@ select:disabled {
   fill: var(--series-1-ink);
   font-size: 8.5px;
   font-weight: 700;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-mono);
   pointer-events: none;
 }
 
@@ -747,7 +767,7 @@ select:disabled {
 .chart-axis-label {
   fill: var(--text-muted);
   font-size: 13px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-mono);
 }
 
 .chart-gridline {
