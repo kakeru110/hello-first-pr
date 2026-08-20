@@ -23,8 +23,19 @@
   const countEl = document.getElementById("exercise-count");
   const emptyEl = document.getElementById("exercise-empty");
   const syncStatus = document.getElementById("sync-status");
+  const categoryPreview = document.getElementById("category-preview");
+  const categoryPreviewLabel = document.getElementById("category-preview-label");
 
   render();
+
+  nameInput.addEventListener("input", updateCategoryPreview);
+
+  function updateCategoryPreview() {
+    const name = nameInput.value.trim();
+    const found = name ? MuscleSync.muscleGroupForExercise(name) : null;
+    categoryPreview.hidden = !found;
+    categoryPreviewLabel.textContent = found ? found.label : "";
+  }
 
   if (MuscleSync.getToken()) {
     syncFromGithub();
@@ -45,6 +56,7 @@
     saveExercises();
     pushExercisesToGithub({ type: "add", name });
     form.reset();
+    updateCategoryPreview();
     render();
   });
 

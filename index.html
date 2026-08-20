@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
 <header class="app-header">
@@ -58,17 +58,6 @@
       </div>
       <button type="submit" id="add-record-btn" class="btn-primary">追加する</button>
     </form>
-
-    <details id="import-details">
-      <summary>テキストで一括インポート</summary>
-      <p class="import-help">
-        <code>YYMMDD場所</code> の見出し行の下に <code>種目名 重量-回数, 重量-回数, ...</code> を1行ずつ書くと、まとめて取り込めます。
-        重量のない種目（有酸素運動など）は <code>回数</code> だけでも構いません。
-      </p>
-      <textarea id="import-text" rows="8" placeholder="260815家&#10;スミスベンチ60-8, 65-8, 70-3, 75-2&#10;スミスサポーテッドロー35-8, 35-8, 35-8&#10;バイク7-10"></textarea>
-      <button type="button" id="import-btn" class="btn-primary btn-secondary">インポート</button>
-      <div id="import-result" class="import-result" hidden></div>
-    </details>
   </section>
 
   <section class="card" id="today-section" aria-labelledby="today-heading" hidden>
@@ -151,7 +140,7 @@
   <p>データはこの端末のブラウザ内に保存されます（サーバー送信なし）</p>
 </footer>
 
-<script src="sync.js?v=26"></script>
-<script src="app.js?v=26"></script>
+<script src="sync.js?v=28"></script>
+<script src="app.js?v=28"></script>
 </body>
 </html>

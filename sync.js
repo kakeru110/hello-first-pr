@@ -91,6 +91,22 @@ window.MuscleSync = (function () {
     return a.localeCompare(b, "ja");
   }
 
+  // 種目名から部位を推測する(記録画面のセレクトのグループ分け、種目管理画面での
+  // 追加時のプレビュー、2週間平均のグラフ集計など、複数箇所で共通して使う)。
+  // 判定は上から優先度順、どれにも当てはまらなければ null(=「その他」)を返す。
+  const MUSCLE_GROUPS = [
+    { key: "cardio", label: "有酸素", test: isCardioExercise },
+    { key: "chest", label: "胸", test: (n) => /ベンチ|チェストプレス|フライ/.test(n) },
+    { key: "back", label: "背中", test: (n) => /ロー|ラットプル|プルダウン|デッドリフト|懸垂/.test(n) },
+    { key: "shoulder", label: "肩", test: (n) => /ミリタリー|ショルダー/.test(n) },
+    { key: "arm", label: "腕", test: (n) => /カール|トライセプス/.test(n) },
+    { key: "leg", label: "脚", test: (n) => /スクワット|レッグ|ランジ/.test(n) },
+  ];
+
+  function muscleGroupForExercise(name) {
+    return MUSCLE_GROUPS.find((g) => g.test(name)) || null;
+  }
+
   return {
     GITHUB_OWNER,
     GITHUB_REPO,
@@ -102,5 +118,6 @@ window.MuscleSync = (function () {
     putFile,
     isCardioExercise,
     compareExerciseNames,
+    muscleGroupForExercise,
   };
 })();
